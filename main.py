@@ -11,20 +11,29 @@ import datetime
 
 
 # Function to log messages to a file with timestamp
+LIVE_LOGS = []
+
 def log_to_file(message):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     try:
         with open("form_autocomplete.log", "a", encoding="utf-8") as log_file:
             log_file.write(f"[{timestamp}] {message}\n")
+        LIVE_LOGS.append(f"[{timestamp}] {message}")
     except UnicodeEncodeError:
         # If Unicode encoding fails, try to clean the message
         clean_message = str(message).encode('ascii', 'replace').decode('ascii')
         with open("form_autocomplete.log", "a", encoding="utf-8") as log_file:
             log_file.write(f"[{timestamp}] {clean_message} (Unicode characters removed)\n")
+        LIVE_LOGS.append(f"[{timestamp}] {clean_message} (Unicode characters removed)")
     except Exception as e:
         # Last resort fallback - write to a separate error log
         with open("log_errors.txt", "a", encoding="utf-8") as error_file:
             error_file.write(f"[{timestamp}] Error logging message: {str(e)}\n")
+        LIVE_LOGS.append(f"[{timestamp}] Error logging message: {str(e)}")
+
+# Function to get the last n live logs
+def get_live_logs(n=50):
+    return LIVE_LOGS[-n:]
 
 # Apply nest_asyncio patch to allow nested event loops
 nest_asyncio.apply()
@@ -1595,7 +1604,7 @@ async def validation_agent(data):
 
     If there are no commands to generate, return an empty list.
 
-    Output exactly as JSON with one key “commands” whose value is an array of strings, for example:
+    Output exactly as JSON with one key "commands" whose value is an array of strings, for example:
     {{
     "commands": [list of commands to fix the form]
     }}

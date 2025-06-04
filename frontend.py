@@ -3,7 +3,8 @@ import asyncio
 import json
 import time
 import html
-from main import data, language_processor, json_agent, validation_agent, reply_agent, next_field, form
+import os
+from main import data, language_processor, json_agent, validation_agent, reply_agent, next_field, form, get_live_logs
 
 st.set_page_config(page_title="Insurance Form Assistant", layout="wide")
 
@@ -662,21 +663,38 @@ def process_step_by_step():
             st.rerun()
     
     elif st.session_state.processing_step == 4:
-        # Validation (if needed)
+        # Validation (with retry logic)
         try:
+            if "validation_tries" not in st.session_state:
+                st.session_state.validation_tries = 3
+
             processed_data = st.session_state.processed_data
             if isinstance(processed_data, dict) and processed_data.get('command_type', '') != 'find':
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 validation_response = loop.run_until_complete(validation_agent(data))
                 loop.close()
-                
+
                 if validation_response.get('commands', []):
-                    st.session_state.processing_message = "🔧 Fixing validation issues..."
-                    # Could add retry logic here if needed
+                    st.session_state.validation_tries -= 1
+                    if st.session_state.validation_tries > 0:
+                        st.session_state.processing_message = f"🔧 Fixing validation issues... (retries left: {st.session_state.validation_tries})"
+                        # Update the message to follow the commands and retry
+                        st.session_state.processed_data = {
+                            "command_type": "update",
+                            "fields": {"_validation_commands": validation_response["commands"]}
+                        }
+                        st.session_state.processing_step = 3  # Go back to JSON agent step
+                        st.rerun()
+                    else:
+                        st.session_state.processing_message = "❌ Validation failed after 3 attempts."
+                        st.session_state.validation_tries = 3  # Reset for next time
+                        st.session_state.processing_step = 5  # Proceed to reply anyway
+                        st.rerun()
                 else:
                     st.session_state.processing_message = "✅ Validation passed"
-            
+                    st.session_state.validation_tries = 3  # Reset for next time
+
             st.session_state.processing_step = 5
             st.rerun()
         except Exception as e:
@@ -899,9 +917,6 @@ if user_input:
         "suggestion_values": None
     })
     
-    # Trigger auto-scroll immediately when user provides input
-    st.session_state.focus_next_field = True
-    
     st.session_state.is_typing = True
     st.session_state.processing_step = 1
     st.session_state.current_user_message = user_input
@@ -910,3 +925,11 @@ if user_input:
 # Handle assistant response with detailed processing
 if st.session_state.is_typing:
     process_step_by_step() 
+
+# --- LOG VIEWER SECTION ---
+from main import get_live_logs
+last_logs = get_live_logs(50)
+log_text = "\n".join(last_logs)
+st.markdown("---")
+st.subheader("📝 System Logs (last 50 lines)")
+st.code(log_text, language="text") 
