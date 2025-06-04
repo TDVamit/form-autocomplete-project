@@ -178,7 +178,6 @@ form = {
           },
           "mailing_address": {
             "type": "object",
-            "ask_collected":True,
             "description": "Mailing address (if different)",
             "ask_collected":True,
             "is_required": False,
@@ -696,7 +695,6 @@ form = {
               "coverage_details": {
                 "type": "object",
                 "description": "Vehicle‑specific coverages of vehicle one",
-                "ask_collected":True,
                 "is_required": False,
                 "value": {
                   "comprehensive_deductible": {
@@ -727,7 +725,6 @@ form = {
                   "rental_reimbursement": {
                     "type": "object",
                     "description": "Rental reimbursement limits of vehicle one",
-                    "ask_collected":True,
                     "is_required": False,
                     "value": {
                       "daily_limit": {

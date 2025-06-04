@@ -648,7 +648,7 @@ def process_step_by_step():
             asyncio.set_event_loop(loop)
             json_response = loop.run_until_complete(json_agent(data, st.session_state.processed_data))
             loop.close()
-            
+
             st.session_state.form_snapshot = json.loads(json.dumps(data.data))
 
             st.session_state.json_response = json_response
