@@ -737,7 +737,7 @@ def process_step_by_step():
         # Validation (with retry logic)
         try:
             if "validation_tries" not in st.session_state:
-                st.session_state.validation_tries = 3
+                st.session_state.validation_tries = 5
 
             processed_data = st.session_state.processed_data
             if isinstance(processed_data, dict) and processed_data.get('command_type', '') != 'find':
@@ -759,12 +759,12 @@ def process_step_by_step():
                         st.rerun()
                     else:
                         st.session_state.processing_message = "❌ Validation failed after 3 attempts."
-                        st.session_state.validation_tries = 3  # Reset for next time
+                        st.session_state.validation_tries = 5  # Reset for next time
                         st.session_state.processing_step = 5  # Proceed to reply anyway
                         st.rerun()
                 else:
                     st.session_state.processing_message = "✅ Validation passed"
-                    st.session_state.validation_tries = 3  # Reset for next time
+                    st.session_state.validation_tries = 5  # Reset for next time
 
             st.session_state.processing_step = 5
             st.rerun()
@@ -845,43 +845,52 @@ with col1:
                     enums = entry.get("enums")
                     suggestions = entry.get("suggestion_values")
                     
-                    if enums or suggestions:
-                        # Create a compact container for all options
+                    # Show suggestions first
+                    if suggestions:
                         with st.container():
-                            st.write("**Quick Options:**")
+                            st.write("**💡 Smart Suggestions:**")
                             
-                            # Collect all options
-                            all_options = []
-                            if enums:
-                                for enum_val in enums:
-                                    if enum_val:
-                                        all_options.append(("enum", enum_val))
-                            if suggestions:
-                                for suggestion in suggestions:
-                                    if suggestion:
-                                        all_options.append(("suggestion", suggestion))
-                            
-                            # Only create columns if we have options to display
-                            if all_options:
-                                # Display all buttons in a more compact layout using fewer columns
-                                num_options = len(all_options)
-                                if num_options <= 2:
-                                    cols = st.columns(num_options)
-                                elif num_options <= 4:
+                            # Display suggestions
+                            suggestion_list = [s for s in suggestions if s]
+                            if suggestion_list:
+                                num_suggestions = len(suggestion_list)
+                                if num_suggestions <= 2:
+                                    cols = st.columns(num_suggestions)
+                                elif num_suggestions <= 4:
                                     cols = st.columns(2)
                                 else:
                                     cols = st.columns(3)
                                 
-                                for idx, (option_type, option_value) in enumerate(all_options):
+                                for idx, suggestion in enumerate(suggestion_list):
                                     col_idx = idx % len(cols)
                                     with cols[col_idx]:
-                                        if option_type == "enum":
-                                            button_label = f"🔘 {option_value}"
-                                        else:
-                                            button_label = f"💡 {option_value}"
-                                        
-                                        if st.button(button_label, key=f"{option_type}_{i}_{idx}_{option_value}", use_container_width=True):
-                                            st.session_state.suggestion_clicked = option_value
+                                        button_label = f"💡 {suggestion}"
+                                        if st.button(button_label, key=f"suggestion_{i}_{idx}_{suggestion}", use_container_width=True):
+                                            st.session_state.suggestion_clicked = suggestion
+                                            st.rerun()
+                    
+                    # Show enums second
+                    if enums:
+                        with st.container():
+                            st.write("**🔘 Available Options:**")
+                            
+                            # Display enums
+                            enum_list = [e for e in enums if e]
+                            if enum_list:
+                                num_enums = len(enum_list)
+                                if num_enums <= 2:
+                                    cols = st.columns(num_enums)
+                                elif num_enums <= 4:
+                                    cols = st.columns(2)
+                                else:
+                                    cols = st.columns(3)
+                                
+                                for idx, enum_val in enumerate(enum_list):
+                                    col_idx = idx % len(cols)
+                                    with cols[col_idx]:
+                                        button_label = f"🔘 {enum_val}"
+                                        if st.button(button_label, key=f"enum_{i}_{idx}_{enum_val}", use_container_width=True):
+                                            st.session_state.suggestion_clicked = enum_val
                                             st.rerun()
         
         # Show detailed processing indicator

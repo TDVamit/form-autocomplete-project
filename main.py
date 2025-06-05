@@ -1452,7 +1452,7 @@ async def language_processor(data,message):
   if user response does not contain any information about next_field then return {{"command_type": "message","message":"message from user"}}
 
   if user asks for 'add another [co-insured, driver, vehicle]' then return {{"command_type": "update","fields":{{ "number_of_[co-insured, driver, vehicle]": "add another"}}}}
-  
+
   if user provide information that is not in next_field then catagorize and make fields based on descriptions.
 
   field name should be strictly from descriptions.
@@ -1587,7 +1587,7 @@ async def validation_agent(data):
   log_to_file(f"filled_fields in validation_agent: {filled_fields}")
   prompt = f"""
   You are a validation agent that validate if form is filled correctly. 
-  
+
   You receive two inputs:
 
     1. command: command from user
@@ -1598,11 +1598,12 @@ async def validation_agent(data):
     closely analyze the command and its meaning and then analyze the filled_fields accordingly.
     any data that is in command and not in filled_fields should be filled.
 
+    strictly ignore all the format and datatype mismatches if the values's meaning are same like ( yes == true, '1' == 1 or '1' == 1.0 or 31/05/2003 == 31-05-2003).
+    carefully analyze when comparing values and understand the meaning of the values.
+
     if user asks to delete a field that is not in filled_fields then dont return any command.
 
     if not then return a list of commands to fix them.
-
-    strictly ignore all the format and datatype mismatches if the values's meaning are same.
 
     If there are no commands to generate, return an empty list.
 
@@ -1669,11 +1670,14 @@ async def reply_agent(data,message):
 
   2. If the required field closely matches any existing descriptions in filled_fields, suggest those values as options or suggest from your knowledge as suggestion_values to the user, can be blank as well.
     - you can suggest from your knowledge as well( like you can suggest state and zip code based on city or education based on occupation)
+    - you can also look at the enums and suggest best enum value for the field based on already filled fields.
 
   3. When responding to the user:
     - Maintain a friendly and proffesional tone an help user to fill form.
     - Clearly specify the next piece of information required.
     - Provide suggested options (enums) if applicable.
+
+  if you are asking for multiple fields at once then ask them in bullet points.
 
   Response Format:
   {{
