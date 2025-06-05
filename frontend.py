@@ -8,6 +8,77 @@ from main import data, language_processor, json_agent, validation_agent, reply_a
 
 st.set_page_config(page_title="Insurance Form Assistant", layout="wide")
 
+# Check if app has started
+if "app_started" not in st.session_state:
+    st.session_state.app_started = False
+
+# Show start screen if app hasn't started
+if not st.session_state.app_started:
+    # Add custom CSS for centering
+    st.markdown("""
+    <style>
+    .main > div {
+        padding-top: 5rem;
+    }
+    .start-title {
+        font-size: 4rem;
+        font-weight: bold;
+        color: #ffffff;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    /* Hide all other elements during start screen */
+    .main .block-container > div:not(:first-child) {
+        display: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Add spacing from top
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    
+    # Centered title
+    st.markdown('<h1 class="start-title">Insurance Form Assistant</h1>', unsafe_allow_html=True)
+    
+    # Add some spacing
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # Center the start button with better spacing
+    col1, col2, col3 = st.columns([2, 1, 2])
+    with col2:
+        if st.button("🚀 Start", key="start_app", help="Begin filling your insurance form", use_container_width=True):
+            # Initialize fresh session-specific data
+            from main import form, Form
+            import json
+            
+            # Create a deep copy of the form for this session
+            session_form_data = json.loads(json.dumps(form))
+            
+            # Initialize session-specific form instance
+            st.session_state.session_data = Form(
+                data=session_form_data, 
+                history=[],
+                language_processor_response=[]
+            )
+            
+            # Initialize other session state variables
+            st.session_state.form_snapshot = json.loads(json.dumps(session_form_data))
+            st.session_state.chat_history = []
+            st.session_state.greeted = False
+            st.session_state.is_typing = False
+            st.session_state.suggestion_clicked = None
+            st.session_state.processing_step = 0
+            st.session_state.processing_message = ""
+            st.session_state.current_user_message = ""
+            st.session_state.focus_next_field = True
+            
+            st.session_state.app_started = True
+            st.rerun()
+    
+    st.stop()
+
+# Main app interface (only shows after start button is pressed)
+
 # Add custom CSS for dark theme chat bubbles
 st.markdown("""
 <style>
@@ -451,8 +522,8 @@ div[data-testid="stNumberInput"]:has(input[id*="next-field"]) {
 # Session state for chat history and form
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-if "form_snapshot" not in st.session_state:
-    st.session_state.form_snapshot = json.loads(json.dumps(data.data))
+if "form_snapshot" not in st.session_state and "session_data" in st.session_state:
+    st.session_state.form_snapshot = json.loads(json.dumps(st.session_state.session_data.data))
 if "greeted" not in st.session_state:
     st.session_state.greeted = False
 if "is_typing" not in st.session_state:
@@ -471,7 +542,7 @@ if "focus_next_field" not in st.session_state:
     st.session_state.focus_next_field = True
 
 # Greet the user on first load
-if not st.session_state.greeted:
+if not st.session_state.greeted and "session_data" in st.session_state:
     greeting = "Hi! To get started with your insurance information, could you please provide Your Full Name."
     st.session_state.chat_history.append({
         "role": "assistant", 
@@ -629,7 +700,7 @@ def process_step_by_step():
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            processed_message = loop.run_until_complete(language_processor(data, st.session_state.current_user_message))
+            processed_message = loop.run_until_complete(language_processor(st.session_state.session_data, st.session_state.current_user_message))
             loop.close()
             
             st.session_state.processed_data = processed_message
@@ -647,10 +718,10 @@ def process_step_by_step():
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            json_response = loop.run_until_complete(json_agent(data, st.session_state.processed_data))
+            json_response = loop.run_until_complete(json_agent(st.session_state.session_data, st.session_state.processed_data))
             loop.close()
 
-            st.session_state.form_snapshot = json.loads(json.dumps(data.data))
+            st.session_state.form_snapshot = json.loads(json.dumps(st.session_state.session_data.data))
 
             st.session_state.json_response = json_response
             st.session_state.processing_message = "🔍 Validating data..."
@@ -672,7 +743,7 @@ def process_step_by_step():
             if isinstance(processed_data, dict) and processed_data.get('command_type', '') != 'find':
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                validation_response = loop.run_until_complete(validation_agent(data))
+                validation_response = loop.run_until_complete(validation_agent(st.session_state.session_data))
                 loop.close()
 
                 if validation_response.get('commands', []):
@@ -710,7 +781,7 @@ def process_step_by_step():
             
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            reply_response = loop.run_until_complete(reply_agent(data, st.session_state.json_response))
+            reply_response = loop.run_until_complete(reply_agent(st.session_state.session_data, st.session_state.json_response))
             loop.close()
             
             # Add response to chat history
@@ -726,7 +797,7 @@ def process_step_by_step():
             })
             
             # Update form snapshot and trigger next field focus
-            st.session_state.form_snapshot = json.loads(json.dumps(data.data))
+            st.session_state.form_snapshot = json.loads(json.dumps(st.session_state.session_data.data))
             st.session_state.focus_next_field = True
             
             # Reset processing state
@@ -748,10 +819,9 @@ with col_reset:
     if st.button('Reset', key='reset_all', help='Reset form, chat, and logs'):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
-        # Re-initialize form and form_snapshot
-        from main import form
-        import json
-        st.session_state.form_snapshot = json.loads(json.dumps(form))
+        # Clear the live logs as well
+        from main import LIVE_LOGS
+        LIVE_LOGS.clear()
         st.rerun()
 
 # Split the page into two columns
@@ -821,7 +891,7 @@ with col1:
                 st.write(f"**{st.session_state.processing_message}**")
     
     # Chat input
-    if next_field(form) is not None:
+    if "session_data" in st.session_state and next_field(st.session_state.session_data.data) is not None:
         user_input = st.chat_input("Type your message and press Enter...")
     else:
         st.success("🎉 Thank you! All required fields are completed.")
@@ -833,7 +903,7 @@ with col2:
     # Create a scrollable container for form data that takes full height
     with st.container(height=750):  # Large height to use most of screen space
         # Add scroll trigger point for next field
-        if st.session_state.focus_next_field and next_field(form):
+        if st.session_state.focus_next_field and next_field(st.session_state.form_snapshot):
             scroll_placeholder = st.empty()
         
         # Render the form data as actual form fields

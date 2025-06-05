@@ -1451,6 +1451,8 @@ async def language_processor(data,message):
   or if user response is 'what is driver one's name' your response should be {{"command_type": "find","fields":{{ "field_description": "Driver one's name"}}}} 
   if user response does not contain any information about next_field then return {{"command_type": "message","message":"message from user"}}
 
+  if user asks for 'add another [co-insured, driver, vehicle]' then return {{"command_type": "update","fields":{{ "number_of_[co-insured, driver, vehicle]": "add another"}}}}
+  
   if user provide information that is not in next_field then catagorize and make fields based on descriptions.
 
   field name should be strictly from descriptions.
