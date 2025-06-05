@@ -1432,59 +1432,54 @@ with col2:
                 // Unique execution ID: {scroll_id}
                 try {{
                     if (window.parent && window.parent.document) {{
-                        // 1) Inject a <style> block into the parent <head> (once) to define both:
-                        //    • pulseHighlight animation
-                        //    • .pulse-highlight class
-                        //    • .fade-out class
+                        // 1) Inject <style> (once) with both the pulsing and fade-out animations.
                         const parentHead = window.parent.document.head;
                         if (parentHead && !window.parent.document.getElementById('pulse-highlight-styles')) {{
                             const styleTag = window.parent.document.createElement('style');
                             styleTag.id = 'pulse-highlight-styles';
                             styleTag.innerHTML = `
-                                /* Pulse animation: glow grows and shrinks */
+                                /* --------------- PULSING GLOW --------------- */
                                 @keyframes pulseHighlight {{
-                                    0%   {{ box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }}
-                                    50%  {{ box-shadow: 0 0 20px rgba(40, 167, 69, 0.8); }}
-                                    100% {{ box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }}
+                                    0%   {{ box-shadow: 0 0 5px rgba(40,167,69,0.5); }}
+                                    50%  {{ box-shadow: 0 0 20px rgba(40,167,69,0.8); }}
+                                    100% {{ box-shadow: 0 0 5px rgba(40,167,69,0.5); }}
                                 }}
 
-                                /* Applied to the element we want to highlight */
                                 .pulse-highlight {{
                                     border: 3px solid #28a745;
-                                    border-radius: 12px;
+                                    border-radius: 7px;
                                     background-color: rgba(40, 167, 69, 0.1);
                                     animation: pulseHighlight 2s ease-in-out infinite;
                                 }}
 
-                                /* Fade-out transition (after pulsing) */
+                                /* --------------- FADE OUT --------------- */
                                 .fade-out {{
                                     transition: all 1s ease-out;
                                     border: 0 solid transparent !important;
                                     background-color: transparent !important;
                                     box-shadow: none !important;
-                                    opacity: 0; /* fade to transparent */
+                                    opacity: 0;
                                 }}
                             `;
                             parentHead.appendChild(styleTag);
                         }}
 
-                        // 2) Wait a moment so that Streamlit has rendered its elements.
+                        // 2) Wait a bit so Streamlit finishes rendering.
                         setTimeout(function() {{
                             const parentDoc = window.parent.document;
                             let foundElement = null;
 
-                            // A) Look for any <label> whose text includes {next_field_desc}
+                            // 2A) Look for a <label> containing the next-field description
                             const labels = parentDoc.querySelectorAll('label');
                             for (let lbl of labels) {{
                                 if (lbl.textContent && lbl.textContent.includes('{next_field_desc}')) {{
-                                    // The Streamlit component container for that label:
-                                    const container = lbl.closest('[data-testid^="st"]') || lbl.parentElement;
-                                    foundElement = container;
+                                    // Grab the Streamlit container for that label
+                                    foundElement = lbl.closest('[data-testid^="st"]') || lbl.parentElement;
                                     break;
                                 }}
                             }}
 
-                            // B) Fallback: look for an alert/info box containing "NEXT:"
+                            // 2B) Fallback: if no matching label, search for an alert/info box with “NEXT:”
                             if (!foundElement) {{
                                 const infoBoxes = parentDoc.querySelectorAll('[data-testid="stAlert"]');
                                 for (let box of infoBoxes) {{
@@ -1496,40 +1491,41 @@ with col2:
                             }}
 
                             if (foundElement) {{
-                                // 3) Instead of highlighting *foundElement*, try to pick its next sibling.
-                                //    If there is no nextElementSibling, we fall back to foundElement itself.
+                                // 3) Compute which element to highlight: the next sibling if it exists,
+                                //    otherwise fall back to the foundElement itself.
                                 let highlightEl = foundElement.nextElementSibling || foundElement;
 
-                                // 4) Scroll it into view (only if not already fully visible).
+                                // 4) Scroll highlightEl into view if it’s not fully visible
                                 const rect = highlightEl.getBoundingClientRect();
-                                const isVisible = rect.top >= 0 && rect.bottom <= window.parent.innerHeight;
-                                if (!isVisible) {{
+                                const parentHeight = window.parent.innerHeight;
+                                const isFullyVisible = rect.top >= 0 && rect.bottom <= parentHeight;
+
+                                if (!isFullyVisible) {{
                                     highlightEl.scrollIntoView({{
                                         behavior: 'smooth',
                                         block: 'center'
                                     }});
                                 }}
 
-                                // 5) Add the pulsing highlight:
+                                // 5) Add pulsing highlight
                                 highlightEl.classList.add('pulse-highlight');
 
-                                // 6) After 4 seconds of pulsing, remove the pulsing class
-                                //    and then add fade-out so it smoothly disappears over 1 second.
+                                // 6) After 4 seconds, remove pulsing and start fade-out
                                 setTimeout(() => {{
                                     highlightEl.classList.remove('pulse-highlight');
                                     highlightEl.classList.add('fade-out');
 
-                                    // 7) Optional: after fade-out completes (≈1s), remove the fade-out class
-                                    //    so that the element returns to its default untouched state.
+                                    // 7) Once fade-out (1s) completes, remove the fade-out class
                                     setTimeout(() => {{
                                         highlightEl.classList.remove('fade-out');
                                     }}, 1000);
+
                                 }}, 4000);
                             }}
                         }}, 1500);
                     }}
                 }} catch (e) {{
-                    // Fail silently if anything goes wrong
+                    // Silent failure
                 }}
             </script>
             """, height=0)
