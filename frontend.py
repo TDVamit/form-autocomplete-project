@@ -742,6 +742,18 @@ def process_step_by_step():
             st.session_state.processing_step = 0
             st.rerun()
 
+# Add a reset button at the top right corner
+col_spacer, col_reset = st.columns([10, 1])
+with col_reset:
+    if st.button('Reset', key='reset_all', help='Reset form, chat, and logs'):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        # Re-initialize form and form_snapshot
+        from main import form
+        import json
+        st.session_state.form_snapshot = json.loads(json.dumps(form))
+        st.rerun()
+
 # Split the page into two columns
 col1, col2 = st.columns([2, 2])
 
