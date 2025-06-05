@@ -1540,15 +1540,18 @@ async def json_agent(data,message):
     • action: "update" (or "add"/"delete" if modifying a list)
     • new_value: the parsed value from the user's response ( all dates should be in this format dd-mm-yyyy) (when deleting list item strictly provide index of the list as value to delete)
     → if successful this will return the next field that needs to be asked to user strictly.
+    if update_field returns false in updating field then strictly call get_field with discription of fields needs to be updated and use that path instead and call update_field again
+
+    if you get delete command then
+    1. get the list of fields using get_field
+    2. get the index of the field by analyzing the command and the list of fields from get_field
+    3. call update_field with path and action as delete and value as index of the field to delete
+    4. if successful this will return the next field that needs to be asked to user strictly.
+    strictly do not delete any field that is not in command.
 
     strictly do not update values where type is 'object' you can only update childrens value of that object
 
-    when deleting list item strictly provide index of the list item to delete as value to delete if index is not known use get_field to get the list and then provide index as value.
-
     if command is asked to delete a field that is not in json then dont return message saying field not found do not delete unneccesary fields.
-
-    Note: if false in updating field then call get_field with discription of current one and use that path instead and call update_field again
-
 
 
     3.Data integrity rules:
@@ -1601,7 +1604,7 @@ async def validation_agent(data):
     strictly ignore all the format and datatype mismatches if the values's meaning are same like ( yes == true, '1' == 1 or '1' == 1.0 or 31/05/2003 == 31-05-2003).
     carefully analyze when comparing values and understand the meaning of the values.
 
-    if user asks to delete a field that is not in filled_fields then dont return any command.
+    if the command is to delete a field that is not in filled_fields then dont return any command.
 
     if not then return a list of commands to fix them.
 
@@ -1611,11 +1614,13 @@ async def validation_agent(data):
     {{
     "commands": [list of commands to fix the form]
     }}
-    example: [
+    example: [    
     "Incorrect value for dob: expected 31/05/2003, found 30/05/2003",
     "Copy insured address into mailing address field",
     ]
 
+    strictly update the fields that are in command with the values provided or from filled_fields.
+ 
     think for longer while analyzing the command and intent behind each command.
   """
 

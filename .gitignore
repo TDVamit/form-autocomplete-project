@@ -9,3 +9,4 @@ wheels/
 # Virtual environments
 .venv
 .env
+form_autocomplete.log
