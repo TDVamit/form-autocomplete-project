@@ -1682,7 +1682,7 @@ async def reply_agent(data,message):
     - Clearly specify the next piece of information required.
     - Provide suggested options (enums) if applicable.
 
-  if you are asking for multiple fields at once then ask them in bullet points.
+  if you are asking for multiple fields at once then ask them in bullet points and only ask for fields from next_field.
 
   Response Format:
   {{
