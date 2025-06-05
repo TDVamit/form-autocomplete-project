@@ -1142,8 +1142,11 @@ def render_form_field(field_name, field_data, level=0):
     
     elif field_type == "integer":
         label = f"{indent}{description}" + (" *" if is_required else "")
-        # Convert to float for st.number_input compatibility
-        number_value = float(value) if value is not None else 0.0
+        # Convert to float for st.number_input compatibility, handle empty strings and invalid values
+        try:
+            number_value = float(value) if value is not None and value != '' else 0.0
+        except (ValueError, TypeError):
+            number_value = 0.0
         st.number_input(label, value=number_value, disabled=True, key=field_id, step=1.0, format="%.0f")
     
     elif field_type == "object":
@@ -1479,7 +1482,7 @@ with col2:
                                 }}
                             }}
 
-                            // 2B) Fallback: if no matching label, search for an alert/info box with “NEXT:”
+                            // 2B) Fallback: if no matching label, search for an alert/info box with "NEXT:"
                             if (!foundElement) {{
                                 const infoBoxes = parentDoc.querySelectorAll('[data-testid="stAlert"]');
                                 for (let box of infoBoxes) {{
@@ -1495,7 +1498,7 @@ with col2:
                                 //    otherwise fall back to the foundElement itself.
                                 let highlightEl = foundElement.nextElementSibling || foundElement;
 
-                                // 4) Scroll highlightEl into view if it’s not fully visible
+                                // 4) Scroll highlightEl into view if it's not fully visible
                                 const rect = highlightEl.getBoundingClientRect();
                                 const parentHeight = window.parent.innerHeight;
                                 const isFullyVisible = rect.top >= 0 && rect.bottom <= parentHeight;
