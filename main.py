@@ -1432,7 +1432,7 @@ async def language_processor(data,message):
   prompt = f"""
   you are a language processor for an agent
   you have access to
-  last_agent_response - last response between user and agent
+  chat_history - chat history between user and agent
   user_response - user response to agent
   next_field - next field that is asked to user
   descriptions - descriptions of all fields in form
@@ -1467,7 +1467,7 @@ async def language_processor(data,message):
 
   think for longer while analyzing user_response and understand the user's intent.
 
-  last_agent_response : {history[-1] if history else []} 
+  chat_history : {history} 
   user_response : {message}
   next_field: {nf}
   descriptions: {descriptions}
@@ -1600,9 +1600,10 @@ async def validation_agent(data):
     you need to analyze the command and understand the user's intent and then look in filled_fields if the data is filled correctly.
     closely analyze the command and its meaning and then analyze the filled_fields accordingly.
     any data that is in command and not in filled_fields should be filled.
+    carefully analyze when comparing values and understand the meaning of the values.
+    strictly make update commands for the fields that are in command but not in filled_fields, command with the values provided in command or from filled_fields.
 
     strictly ignore all the format and datatype mismatches if the values's meaning are same like ( yes == true, '1' == 1 or '1' == 1.0 or 31/05/2003 == 31-05-2003).
-    carefully analyze when comparing values and understand the meaning of the values.
 
     if the command is to delete a field that is not in filled_fields then dont return any command.
 
@@ -1619,7 +1620,6 @@ async def validation_agent(data):
     "Copy insured address into mailing address field",
     ]
 
-    strictly update the fields that are in command with the values provided or from filled_fields.
  
     think for longer while analyzing the command and intent behind each command.
   """
