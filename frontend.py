@@ -1202,7 +1202,16 @@ def process_step_by_step():
             asyncio.set_event_loop(loop)
             processed_message = loop.run_until_complete(language_processor(st.session_state.session_data, st.session_state.current_user_message))
             loop.close()
-            
+            if processed_message['command_type'] == 'reply_to_user':
+                st.session_state.chat_history.append({
+                    "role": "assistant", 
+                    "content": processed_message['message'],
+                    "enums": None,
+                    "suggestion_values": None
+                })
+                st.session_state.is_typing = False
+                st.session_state.processing_step = 0
+                
             st.session_state.processed_data = processed_message
             st.session_state.processing_message = "⚙️ Updating form..."
             st.session_state.processing_step = 3

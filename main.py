@@ -338,7 +338,7 @@ form = {
           "current_carrier": {
             "type": "string",
             "description": "Name of the current insurance carrier",
-            "is_required": True,
+            "is_required": False,
             "value": None
           },
           "current_carrier_premium": {
@@ -1349,6 +1349,29 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
              or json_path.endswith(".last_name.value"):
             update_assigned_driver_enums(form.context.data)
 
+        # Clear related policy fields when current_carrier is set to empty string
+        elif json_path == "questionaire_repo.value.policy_details.value.current_carrier.value" and (value == ' ' or value == '' or value == None or value == " " or value == 0):
+            # List of related policy fields to clear
+            related_policy_paths = [
+                "questionaire_repo.value.policy_details.value.current_carrier_premium.value",
+                "questionaire_repo.value.policy_details.value.years_with_prior_carrier.value", 
+                "questionaire_repo.value.policy_details.value.prior_insurance_liability_limit.value",
+                "questionaire_repo.value.policy_details.value.policy_term_length.value",
+                "questionaire_repo.value.policy_details.value.payment_frequency.value"
+            ]
+            
+            # Clear each related field
+            for related_path in related_policy_paths:
+                try:
+                    related_tokens = _parse_tokens(related_path)
+                    related_cur = form.context.data
+                    for token in related_tokens[:-1]:
+                        related_cur = related_cur[token]
+                    related_final = related_tokens[-1]
+                    related_cur[related_final] = ' '
+                    log_to_file(f"Cleared related policy field: {related_path}")
+                except Exception as e:
+                    log_to_file(f"Error clearing related policy field {related_path}: {str(e)}")
 
 
     except Exception as e:
@@ -1453,6 +1476,9 @@ async def language_processor(data,message):
 
   if user asks for 'add another [co-insured, driver, vehicle]' then return {{"command_type": "update","fields":{{ "number_of_[co-insured, driver, vehicle]": "add another"}}}}
 
+  if user ask to skip or leave a field blank that where 'is_required' is true return {{"command_type":"reply_to_user","message":"message saying that field is required please provide the information with a friendly tone"}} message should be in a friendly tone.
+  also if user provide invalid information for a field like negative numbers,invalid format for email or wrong input for enum or any other invalid information then return {{"command_type":"reply_to_user","message":"message saying that field is required please provide the information with a friendly tone"}} message should be in a friendly tone.
+  
   if user provide information that is not in next_field then catagorize and make fields based on descriptions.
 
   field name should be strictly from descriptions.
@@ -1492,6 +1518,8 @@ async def language_processor(data,message):
 
   response = response.to_dict()
   response = json.loads(response["choices"][0]["message"]["content"])
+  if response['command_type'] == 'reply_to_user':
+      data.history.append({"role":"assistant","content":response['message']})
   data.language_processor_response.append(response)
   data.language_processor_response = data.language_processor_response[-5:]
   history.append({"role":"user","content":message})
@@ -1722,6 +1750,8 @@ async def reply_agent(data,message):
 
 async def chat_pipeline(data,message):
   processed_message = await language_processor(data,message)
+  if processed_message['command_type'] == 'reply_to_user':
+    return processed_message['message']
   message = processed_message
   tries = 3
   while tries > 0:
