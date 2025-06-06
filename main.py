@@ -1605,7 +1605,19 @@ async def json_agent(data,message):
       instructions=INSTRUCTIONS.strip(),
       tools=[update_field,get_field],
   )
-  result = await Runner.run(agent, str(message), context=data, max_turns=30)
+  retries = 3
+  last_error = None
+  
+  for attempt in range(retries):
+      try:
+          result = await Runner.run(agent, str(message), context=data, max_turns=30)
+          break
+      except Exception as e:
+          last_error = e
+          log_to_file(f"error in json_agent attempt {attempt + 1}: {str(e)}")
+          if attempt == retries - 1:
+              return {"reply_message": f"error in json_agent after {retries} attempts: {str(last_error)}"}
+          continue
   response = result.final_output
   response = json.loads(response)
   log_to_file(f"response: {response}")
