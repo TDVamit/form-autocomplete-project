@@ -1036,7 +1036,7 @@ def next_field(form_object):
           return field
 
     elif field_object['type'] == 'list':
-      if not value:
+      if value is None:
         return field_object
       elif not isinstance(value[0],dict):
         return None
