@@ -4,7 +4,7 @@ import json
 import time
 import html
 import os
-from main import data, language_processor, json_agent, validation_agent, reply_agent, next_field, form, get_live_logs
+from main import data, language_processor, json_agent, validation_agent, reply_agent, next_field, form, get_live_logs, validate_date
 
 st.set_page_config(page_title="Insurance Form Assistant", layout="wide")
 
@@ -1311,6 +1311,7 @@ def process_step_by_step():
             asyncio.set_event_loop(loop)
             processed_message = loop.run_until_complete(language_processor(st.session_state.session_data, st.session_state.current_user_message))
             loop.close()
+            processed_message = validate_date(processed_message)
             if processed_message['command_type'] == 'reply_to_user':
                 st.session_state.chat_history.append({
                     "role": "assistant", 
@@ -1451,9 +1452,9 @@ with col1:
             total_tokens = input_tokens + output_tokens + cached_tokens
             
             # Calculate costs
-            input_cost = (input_tokens / 1_000_000) * 0.80
-            cached_cost = (cached_tokens / 1_000_000) * 0.20
-            output_cost = (output_tokens / 1_000_000) * 3.20
+            input_cost = (input_tokens / 1_000_000) * 0.40
+            cached_cost = (cached_tokens / 1_000_000) * 0.10
+            output_cost = (output_tokens / 1_000_000) * 1.60
             total_cost = input_cost + cached_cost + output_cost
             
             # Format tokens in k/m/b terms

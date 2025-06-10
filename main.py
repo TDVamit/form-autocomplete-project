@@ -256,6 +256,79 @@ form = {
             "description": "County of residence",
             "is_required": False,
             "value": None
+          },
+          "license_status": {
+            "type": "enum",
+            "description": "License status of insured",
+            "is_required": False,
+            "value": None,
+            "enum": ["Valid", "Suspended", "Expired"]
+          },
+          "licensed_state": {
+            "type": "string",
+            "description": "State where the insured is licensed",
+            "is_required": False,
+            "value": None
+          },
+          "license_number": {
+            "type": "string",
+            "description": "Insured's license number (min. 8 chars)",
+            "is_required": False,
+            "value": None
+          },
+          "licensed_age": {
+            "type": "integer",
+            "description": "Age when the insured was licensed",
+            "is_required": False,
+            "value": None
+          },
+          "rated": {
+            "type": "boolean",
+            "description": "Whether the insured is rated",
+            "is_required": False,
+            "value": None
+          },
+          "sr22_required": {
+            "type": "boolean",
+            "description": "Whether an SR‑22 is required of insured",
+            "is_required": False,
+            "value": None
+          },
+          "drive_for_rideshare": {
+            "type": "boolean",
+            "description": "Whether the insured uses rideshare services",
+            "is_required": False,
+            "value": None
+          },
+          "drive_for_delivery": {
+            "type": "boolean",
+            "description": "Whether the insured uses delivery services",
+            "is_required": False,
+            "value": None
+          },
+          "driver_discounts": {
+            "type": "string",
+            "description": "Any discounts applicable to the insured",
+            "is_required": False,
+            "value": None
+          },
+          "good_student_discount": {
+            "type": "boolean",
+            "description": "Good student discount eligibility to insured",
+            "is_required": False,
+            "value": None
+          },
+          "mature_driver_discount": {
+            "type": "boolean",
+            "description": "Mature driver discount eligibility to insured",
+            "is_required": False,
+            "value": None
+          },
+          "safe_driver_discount": {
+            "type": "boolean",
+            "description": "Safe driver discount eligibility to insured",
+            "is_required": False,
+            "value": None
           }
         }
       }
@@ -347,6 +420,79 @@ form = {
                 "is_required": False,
                 "value": None,
                 "enum": ["High School", "Some College", "Associates Degree", "Bachelors", "Masters", "PhD"]
+              },
+              "license_status": {
+                "type": "enum",
+                "description": "License status of co-insured one",
+                "is_required": False,
+                "value": None,
+                "enum": ["Valid", "Suspended", "Expired"]
+              },
+              "licensed_state": {
+                "type": "string",
+                "description": "State where the co-insured one is licensed",
+                "is_required": False,
+                "value": None
+              },
+              "license_number": {
+                "type": "string",
+                "description": "Co-insured one's license number (min. 8 chars)",
+                "is_required": False,
+                "value": None
+              },
+              "licensed_age": {
+                "type": "integer",
+                "description": "Age when the co-insured one was licensed",
+                "is_required": False,
+                "value": None
+              },
+              "rated": {
+                "type": "boolean",
+                "description": "Whether the co-insured one is rated",
+                "is_required": False,
+                "value": None
+              },
+              "sr22_required": {
+                "type": "boolean",
+                "description": "Whether an SR‑22 is required of co-insured one",
+                "is_required": False,
+                "value": None
+              },
+              "drive_for_rideshare": {
+                "type": "boolean",
+                "description": "Whether the co-insured one uses rideshare services",
+                "is_required": False,
+                "value": None
+              },
+              "drive_for_delivery": {
+                "type": "boolean",
+                "description": "Whether the co-insured one uses delivery services",
+                "is_required": False,
+                "value": None
+              },
+              "driver_discounts": {
+                "type": "string",
+                "description": "Any discounts applicable to the co-insured one",
+                "is_required": False,
+                "value": None
+              },
+              "good_student_discount": {
+                "type": "boolean",
+                "description": "Good student discount eligibility to co-insured one",
+                "is_required": False,
+                "value": None
+              },
+              "mature_driver_discount": {
+                "type": "boolean",
+                "description": "Mature driver discount eligibility to co-insured one",
+                "is_required": False,
+                "value": None
+              },
+              "safe_driver_discount": {
+                "type": "boolean",
+                "description": "Safe driver discount eligibility to co-insured one",
+                "is_required": False,
+                "value": None
               }
             }
           }
@@ -474,7 +620,7 @@ form = {
       },
       "number_of_drivers": {
         "type": "integer",
-        "description": "Number of drivers to be insured",
+        "description": "Number of Additional drivers to be insured",
         "is_required": False,
         "value": None
       },
@@ -1417,38 +1563,6 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
             elif isinstance(cur, dict) and "value" in cur[final] and isinstance(cur[final]["value"], list):
                 cur[final]["value"].pop(value)
 
-
-        if path in COMMON_SYNC_FIELDS :
-          driver_tokens = _parse_tokens(COMMON_SYNC_FIELDS[path])
-          driver_cur = form.context.data
-          for i, driver_token in enumerate(driver_tokens[:-1]):
-              driver_cur = driver_cur[driver_token]
-          driver_final = driver_tokens[-1]
-
-          if operation == "update":
-              if isinstance(driver_final, int):
-                  driver_cur[driver_final] = value
-              else:
-                  driver_cur[driver_final] = value
-
-          elif operation == "add":
-              if isinstance(driver_cur[driver_final], list):
-                  driver_cur[driver_final].append(value)
-              elif isinstance(driver_cur, dict) and "value" in driver_cur[driver_final] and isinstance(driver_cur[driver_final]["value"], list):
-                  driver_cur[driver_final]["value"].append(value)
-
-          elif operation == "delete":
-              if isinstance(driver_cur[driver_final], list):
-                  driver_cur[driver_final].pop(value)
-              elif isinstance(cur, dict) and "value" in driver_cur[driver_final] and isinstance(driver_cur[driver_final]["value"], list):
-                  driver_cur[driver_final]["value"].pop(value)
-
-
-    except Exception as e:
-      log_to_file(f"error in updating field: {path} {str(e)}")
-      return False
-
-    try:
         # === hook into special fields ===
         json_path = ".".join(
             tok if isinstance(tok, str) else f"[{tok}]"
@@ -1541,11 +1655,6 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
                 except Exception as e:
                     log_to_file(f"Error auto-updating marital status for co-insured: {str(e)}")
         
-
-        # Auto-sync co-insured data to drivers and increase driver count
-
-
-
         # Handle additional_drivers boolean field
         elif json_path.endswith("questionaire_repo.value.additional_drivers.value"):
             try:
@@ -1595,10 +1704,6 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
                         ["questionaire_repo", "value", "co_insured", "value"],
                         new_co_insured_count
                     )
-
-                    
-                    
-                    # Also increase drivers to accommodate new co-insured
                 
                     current_drivers = len(form.context.data["questionaire_repo"]["value"]["driver_details"]["value"])
                     required_drivers = current_drivers + 1
@@ -1655,60 +1760,10 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
                     
             except Exception as e:
                 log_to_file(f"Error handling additional_vehicles: {str(e)}")
-        if "questionaire_repo.value.co_insured.value.[" in json_path:
-            try:
-                # Extract co-insured index from the path
-                index = json_path.split('[')[1].split(']')[0]
-                if index is not None:
-                    co_insured_index = int(index)
-                    driver_index = co_insured_index + 1  # co-insured[0] -> driver[1], co-insured[1] -> driver[2], etc.
-                    
-                    # Get current number of drivers
-                    current_drivers = len(form.context.data["questionaire_repo"]["value"]["driver_details"]["value"])
-                    required_drivers = driver_index + 1  # +1 because we need driver[driver_index] to exist
-                    
-                    # Increase number of drivers if needed
-                    if current_drivers < required_drivers:
-                        resize_list_with_ordinal(
-                            form.context.data,
-                            ["questionaire_repo", "value", "driver_details", "value"],
-                            required_drivers
-                        )
-                        # Update number_of_drivers field
-                        form.context.data["questionaire_repo"]["value"]["number_of_drivers"]["value"] = required_drivers
-                        log_to_file(f"Auto-increased number of drivers to {required_drivers} to accommodate co-insured {co_insured_index}")
-                    
-                    # Copy co-insured data to corresponding driver
-                    co_insured_data = form.context.data["questionaire_repo"]["value"]["co_insured"]["value"][co_insured_index]["value"]
-                    driver_data = form.context.data["questionaire_repo"]["value"]["driver_details"]["value"][driver_index]["value"]
-                    
-                    # Define fields to sync from co-insured to driver
-                    new_sync_fields = [
-                        "name", "date_of_birth", "gender", "relationship", 
-                        "marital_status", "occupation", "education"
-                    ]
-                    
-                    for field in new_sync_fields:
-                        if field in co_insured_data and field in driver_data:
-                            if field == "name":
-                                # Copy all name sub-fields
-                                for name_field in ["first_name", "middle_name", "last_name"]:
-                                    if (co_insured_data[field]["value"][name_field]["value"] is not None and 
-                                        co_insured_data[field]["value"][name_field]["value"] != ""):
-                                        driver_data[field]["value"][name_field]["value"] = co_insured_data[field]["value"][name_field]["value"]
-                            else:
-                                # Copy simple field
-                                if (co_insured_data[field]["value"] is not None and 
-                                    co_insured_data[field]["value"] != ""):
-                                    driver_data[field]["value"] = co_insured_data[field]["value"]
-                    
-                    # Update assigned driver enums after adding new drivers
-                    update_assigned_driver_enums(form.context.data)
-                    
-                    log_to_file(f"Auto-synced co-insured {co_insured_index} data to driver {driver_index}")
-                    
-            except Exception as e:
-                log_to_file(f"Error auto-syncing co-insured to driver: {str(e)}")
+
+        elif "lead_repo.value.marital_status.value" in json_path:
+            if value.lower() == "single":
+                form.context.data["questionaire_repo"]["value"]["co_insured"]["value"][0]["value"]["relationship"]["enums"].pop("Spouse")
 
     except Exception as e:
         log_to_file(f"error in multiplying fields: {path} {str(e)}")
@@ -1733,9 +1788,9 @@ normalise(form)
 data = Form(data=form, history=[],language_processor_response=[],input_tokens=0,output_tokens=0,cached_tokens=0)
 
 # Token pricing constants (per 1M tokens)
-INPUT_TOKEN_PRICE = 0.80  # $0.80 / 1M tokens
-CACHED_TOKEN_PRICE = 0.20  # $0.20 / 1M tokens  
-OUTPUT_TOKEN_PRICE = 3.20  # $3.20 / 1M tokens
+INPUT_TOKEN_PRICE = 0.40  # $0.40 / 1M tokens
+CACHED_TOKEN_PRICE = 0.10  # $0.10 / 1M tokens  
+OUTPUT_TOKEN_PRICE = 1.60  # $1.60 / 1M tokens
 
 def calculate_costs(input_tokens, cached_tokens, output_tokens):
     """Calculate costs for different token types"""
@@ -1823,6 +1878,30 @@ def get_today_date():
   """Returns today's date in dd-mm-yyyy format"""
   return str(datetime.now().strftime("%d-%m-%Y"))
 
+def validate_date(language_processor_response):
+    if language_processor_response.get("command_type") == "update":
+        for field, value in language_processor_response.get("fields").items():
+          if 'date' in field.lower():
+              if 'effective' in field.lower():
+                  try:
+                      value_date = datetime.strptime(value, "%d-%m-%Y")
+                      today_date = datetime.strptime(get_today_date(), "%d-%m-%Y")
+                      if value_date < today_date:
+                          return {"command_type":"reply_to_user","message":"Can you please provide date again? Effective date cannot be in past"}
+                  except ValueError:
+                      return {"command_type":"reply_to_user","message":"Please provide date again."}
+              else:
+                  try:
+                      value_date = datetime.strptime(value, "%d-%m-%Y") 
+                      today_date = datetime.strptime(get_today_date(), "%d-%m-%Y")
+                      if value_date > today_date:
+                          return {"command_type":"reply_to_user","message":"Can you please provide date again? Date of birth cannot be in the future"}
+                  except ValueError:
+                      return {"command_type":"reply_to_user","message":"Please provide date again."}
+                  
+
+    return language_processor_response
+
 async def language_processor(data, message):
     try:
       print("language_processor called with message: ", message)
@@ -1858,7 +1937,8 @@ async def language_processor(data, message):
 
       if user ask to skip or leave a field blank that where 'is_required' is true return {{"command_type":"reply_to_user","message":"message saying that field is required please provide the information with a friendly tone"}} message should be in a friendly tone.
       also if user provide invalid information for a field like negative numbers,invalid format for email or wrong input for enum or any other invalid information then return {{"command_type":"reply_to_user","message":"message saying that field is required please provide the information with a friendly tone"}} message should be in a friendly tone.
-      also check for dates today's date is {get_today_date()} date of birth should be in the past and effective date should be in the future.
+      if user says 'dont have' or similar and is_required is false then return fields as empty string.
+      if user says 'dont want to add more [co-insured, driver, vehicle]' or ' remove last [co-insured, driver, vehicle]' then return {{"command_type":"update","fields":{{"List of [co-insured, driver, vehicle]": 'remove last'}}}}
 
       if user says 'same as before : value' or 'same as this field : value' or 'same as previous field : value' then return {{"command_type":"update","fields":{{"field_description from next_field":"value from user"}}}} do not pass 'same as before' or 'same as this field' or 'same as previous field' text in value. 
       if user provide information that is not in next_field then catagorize and make fields based on descriptions.
@@ -2128,6 +2208,18 @@ async def validation_agent(data):
   log_to_file(f"validation_agent response: {response}")
   return response
 
+def get_suggestion_values(data):
+    path = data['json_path']
+    suggestion_values = []
+    if 'questionaire_repo.value.vehicle_details.value[' in path and '].value.garaging_address.value' in path:
+        insured_address = data['data']['questionaire_repo']['value']['insured_address']['value']
+        suggestion_values.append(f"insured address: {insured_address}")
+        mail_address = data['data']['questionaire_repo']['value']['mailing_address']['value']
+        suggestion_values.append(f"mailing address: {mail_address}")
+        for co_insured in data['data']['questionaire_repo']['value']['co_insured']['value']:
+            suggestion_values.append(f"co-insured address: {co_insured['value']['address']['value']}")
+    return suggestion_values
+
 async def reply_agent(data,message):
   log_to_file("reply_agent called")
   print("reply_agent called :",message)
@@ -2136,6 +2228,7 @@ async def reply_agent(data,message):
   filled_fields = str(extract_non_null_values(data.data)).strip()
   log_to_file(f"filled_fields: {filled_fields}")
   nxt = next_field(data.data)
+  suggestion_values = get_suggestion_values(nxt)
   prompt = f"""
   You are 'Robert', a friendly and proffesional agent from Nationwide Insurance Agency.
   Your role is to assist users in completing their insurance information by analyzing the chat history and the current state of filled fields.
@@ -2183,6 +2276,9 @@ async def reply_agent(data,message):
   - Use delimiters or formatting to highlight key information when necessary.
   """
 
+  if suggestion_values:
+    prompt += f"\n\nSuggestion Values: {suggestion_values}"
+
   client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
   response = await client.chat.completions.create(
@@ -2227,6 +2323,7 @@ async def reply_agent(data,message):
 
 async def chat_pipeline(data,message):
   processed_message = await language_processor(data,message)
+  processed_message = validate_date(processed_message)
   if processed_message['command_type'] == 'reply_to_user':
     return processed_message['message']
   message = processed_message
