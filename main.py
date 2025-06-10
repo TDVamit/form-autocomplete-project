@@ -2164,7 +2164,7 @@ async def validation_agent(data):
     }}
     example: [    
     "Incorrect value for dob: expected 31/05/2003, found 30/05/2003",
-    "Copy insured address into mailing address field",
+    "Copy insured address : {{value}} - into mailing address field",
     ]
  
     think for longer while analyzing the command and intent behind each command.
