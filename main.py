@@ -2149,6 +2149,8 @@ async def validation_agent(data):
 
     if command field is to 'Do not add more co-insured/driver/vehicle' then skip validation and return empty list.
 
+    if command is 'no prior claim' or 'no address' or 'dont have' or similar then value should be empty string instead of text like 'no prior claim' or 'no address'.
+
     if the command is to delete a field that is not in filled_fields then dont return any command.
 
     if not then return a list of commands to fix them.
