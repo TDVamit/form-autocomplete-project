@@ -2148,6 +2148,7 @@ async def validation_agent(data):
     strictly ignore all the format and datatype mismatches if the values's meaning are same like ( yes == true, '1' == 1 or '1' == 1.0 or 31/05/2003 == 31-05-2003).
 
     if command field is to 'Do not add more co-insured/driver/vehicle' then skip validation and return empty list.
+    if command field is to 'remove last co-insured/driver/vehicle' skip validation.
 
     if command is 'no prior claim' or 'no address' or 'dont have' or similar then value should be empty string instead of text like 'no prior claim' or 'no address'.
 
