@@ -626,7 +626,7 @@ form = {
       },
       "driver_details": {
         "type": "list",
-        "description": "List of driver profiles",
+        "description": "List of Additional driver profiles",
         "is_required": False,
         "value": [
           {
