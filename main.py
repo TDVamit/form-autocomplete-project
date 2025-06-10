@@ -3,33 +3,61 @@ import nest_asyncio
 import re
 import copy
 from typing import Any, List, Union
-from agents import Agent, RunContextWrapper, Runner, function_tool
+from agents import Agent, RunContextWrapper, Runner, function_tool,Usage,RunHooks
 from dataclasses import dataclass
 from openai import AsyncOpenAI
 import json
 import datetime
+import asyncio
+import hashlib
+from datetime import datetime
+import asyncio
 
+
+
+# Add after the existing imports
+_description_cache = {}
+_field_cache = {}
+
+def get_descriptions_cached(data_hash):
+    """Cache descriptions extraction"""
+    if data_hash not in _description_cache:
+        _description_cache[data_hash] = extract_descriptions(data.data)
+    return _description_cache[data_hash]
+
+def get_next_field_cached(data_hash, data):
+    """Cache next field computation"""
+    if data_hash not in _field_cache:
+        _field_cache[data_hash] = next_field(data)
+    return _field_cache[data_hash]
+
+def get_data_hash(data):
+    """Generate hash for form data state"""
+    return hashlib.md5(json.dumps(data.data, sort_keys=True).encode()).hexdigest()
 
 # Function to log messages to a file with timestamp
 LIVE_LOGS = []
 
 def log_to_file(message):
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     try:
-        with open("form_autocomplete.log", "a", encoding="utf-8") as log_file:
-            log_file.write(f"[{timestamp}] {message}\n")
-        LIVE_LOGS.append(f"[{timestamp}] {message}")
-    except UnicodeEncodeError:
-        # If Unicode encoding fails, try to clean the message
-        clean_message = str(message).encode('ascii', 'replace').decode('ascii')
-        with open("form_autocomplete.log", "a", encoding="utf-8") as log_file:
-            log_file.write(f"[{timestamp}] {clean_message} (Unicode characters removed)\n")
-        LIVE_LOGS.append(f"[{timestamp}] {clean_message} (Unicode characters removed)")
+      timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      try:
+          with open("form_autocomplete.log", "a", encoding="utf-8") as log_file:
+              log_file.write(f"[{timestamp}] {message}\n")
+          LIVE_LOGS.append(f"[{timestamp}] {message}")
+      except UnicodeEncodeError:
+          # If Unicode encoding fails, try to clean the message
+          clean_message = str(message).encode('ascii', 'replace').decode('ascii')
+          with open("form_autocomplete.log", "a", encoding="utf-8") as log_file:
+              log_file.write(f"[{timestamp}] {clean_message} (Unicode characters removed)\n")
+          LIVE_LOGS.append(f"[{timestamp}] {clean_message} (Unicode characters removed)")
+      except Exception as e:
+          # Last resort fallback - write to a separate error log
+          with open("log_errors.txt", "a", encoding="utf-8") as error_file:
+              error_file.write(f"[{timestamp}] Error logging message: {str(e)}\n")
+          LIVE_LOGS.append(f"[{timestamp}] Error logging message: {str(e)}")
     except Exception as e:
-        # Last resort fallback - write to a separate error log
-        with open("log_errors.txt", "a", encoding="utf-8") as error_file:
-            error_file.write(f"[{timestamp}] Error logging message: {str(e)}\n")
-        LIVE_LOGS.append(f"[{timestamp}] Error logging message: {str(e)}")
+      print(f"error in log_to_file: {e}")
 
 # Function to get the last n live logs
 def get_live_logs(n=50):
@@ -298,7 +326,7 @@ form = {
                 "description": "Relationship to the policyholder of co-insured one",
                 "is_required": False,
                 "value": None,
-                "enum": ["Spouse", "Child", "Parent", "Self", "Other"]
+                "enum": ["Spouse", "Child", "Parent", "Other"]
               },
               "marital_status": {
                 "type": "enum",
@@ -323,6 +351,12 @@ form = {
             }
           }
         ]
+      },
+      "additional_co_insured":{
+        "type":"boolean",
+        "description":"Do not add more co-insured",
+        "is_required":False,
+        "value":None
       },
       "policy_details": {
         "type": "object",
@@ -597,6 +631,12 @@ form = {
           }
         ]
       },
+      "additional_drivers":{
+        "type":"boolean",
+        "description":"Do not add more drivers",
+        "is_required":False,
+        "value":None
+      },
       "number_of_vehicles": {
         "type": "integer",
         "description": "Number of vehicles to be insured",
@@ -780,6 +820,12 @@ form = {
             }
           }
         ]
+      },
+      "additional_vehicles":{
+        "type":"boolean",
+        "description":"Do not add more vehicles",
+        "is_required":False,
+        "value":None
       }
     }
   }
@@ -1048,6 +1094,9 @@ class Form:
     data: dict
     history: list
     language_processor_response: list
+    input_tokens: int
+    output_tokens: int
+    cached_tokens: int
 
 # Ordinals map for renaming descriptions
 ORDINALS = {
@@ -1236,11 +1285,103 @@ def normalize_questionnaire(q_repo: dict) -> dict:
     }
     for cf, new_val in count_fields.items():
         node = q_repo["value"].get(cf)
-        # only overwrite if it was not originally None
         if node and node.get("value") is not None:
             node["value"] = new_val
 
-    return q_repo
+    return
+
+def fill_form_temp(json_path: str, json_data: dict) -> None:
+    """Fill form with temporary data from top until reaching specified json_path"""
+    log_to_file(f"Filling form with temporary data from top until reaching {json_path}")
+    
+    def _fill_temp_value(node: dict):
+        """Fill a single node with temporary value if it's empty"""
+        if node.get("value") is not None:
+            return False  # Already filled
+            
+        node_type = node.get("type")
+        if node_type == "string":
+            node["value"] = "sample_text"
+        elif node_type == "integer":
+            node["value"] = 1
+        elif node_type == "boolean":
+            node["value"] = True
+        elif node_type == "date":
+            node["value"] = "01-01-2000"
+        elif node_type == "enum":
+            enum_options = node.get("enum", [])
+            if enum_options:
+                node["value"] = enum_options[0]
+            else:
+                node["value"] = "option1"
+        
+        if node_type in ["string", "integer", "boolean", "date", "enum"]:
+            log_to_file(f"Filled field at path: {node.get('json_path', 'unknown')} with type: {node_type}")
+            return True  # Successfully filled
+        
+        return False
+
+    def _traverse_and_fill_until_target(node: dict) -> bool:
+        """Recursively traverse and fill nodes until target path is reached. Returns True if target found."""
+        if not isinstance(node, dict):
+            return False
+            
+        # Check if this node has the target json_path
+        node_json_path = node.get("json_path", "")
+        if node_json_path == json_path:
+            # Found our target! Fill this field and stop
+            _fill_temp_value(node)
+            log_to_file(f"Reached target path: {json_path}")
+            return True
+        
+        # If this is a fillable field (has json_path and is primitive), fill it
+        if node_json_path and node.get("type") in ["string", "integer", "boolean", "date", "enum"]:
+            _fill_temp_value(node)
+        
+        # Traverse into nested structures
+        node_type = node.get("type")
+        
+        if node_type == "object" and "value" in node and isinstance(node["value"], dict):
+            # Traverse object fields in order
+            for key, child_node in node["value"].items():
+                if _traverse_and_fill_until_target(child_node):
+                    return True  # Target found, stop traversal
+                    
+        elif node_type == "list" and "value" in node and isinstance(node["value"], list):
+            # Traverse list items in order
+            for item in node["value"]:
+                if isinstance(item, dict):
+                    if _traverse_and_fill_until_target(item):
+                        return True  # Target found, stop traversal
+        
+        # Also check any other nested dictionaries
+        for key, value in node.items():
+            if key != "value" and isinstance(value, dict):
+                if _traverse_and_fill_until_target(value):
+                    return True
+            elif key == "value":
+                if isinstance(value, dict):
+                    for sub_key, sub_value in value.items():
+                        if isinstance(sub_value, dict):
+                            if _traverse_and_fill_until_target(sub_value):
+                                return True
+                elif isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, dict):
+                            if _traverse_and_fill_until_target(item):
+                                return True
+        
+        return False  # Target not found in this branch
+
+    # Start traversal from the root of the form
+    # We need to traverse the top-level sections in order
+    for section_name, section_data in json_data.items():
+        if _traverse_and_fill_until_target(section_data):
+            break  # Target found, stop processing
+    
+    log_to_file(f"Completed filling form with temporary data until: {json_path}")
+    return
+
 
 @function_tool(strict_mode=False)
 async def update_field(form: RunContextWrapper[Form], path: str, operation: str, value: Any = None) -> bool:
@@ -1324,7 +1465,6 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
             )
             update_assigned_driver_enums(form.context.data)
 
-        # number_of_vehicles → resize vehicle_details list
         elif json_path.endswith("questionaire_repo.value.number_of_vehicles.value"):
             count = int(value or 0)
             resize_list_with_ordinal(
@@ -1341,9 +1481,17 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
                 ["questionaire_repo", "value", "co_insured", "value"],
                 count
             )
+            current_drivers = len(form.context.data["questionaire_repo"]["value"]["driver_details"]["value"])
+            count = count + current_drivers
+            if current_drivers < count:
+                resize_list_with_ordinal(
+                    form.context.data,
+                    ["questionaire_repo", "value", "driver_details", "value"],
+                    count
+                )
+            update_assigned_driver_enums(form.context.data)
 
 
-        # any driver name change → re-sync enums
         elif "driver_details.value[" in json_path and json_path.endswith(".first_name.value") \
              or json_path.endswith(".middle_name.value") \
              or json_path.endswith(".last_name.value"):
@@ -1373,6 +1521,194 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
                 except Exception as e:
                     log_to_file(f"Error clearing related policy field {related_path}: {str(e)}")
 
+        # Sync co-insured relationship and marital status
+        elif "questionaire_repo.value.co_insured.value.[" in json_path and json_path.endswith(".relationship.value"):
+            # When relationship is set to "Spouse", auto-set marital_status to "Married" (case insensitive)
+            if value and str(value).lower() == "spouse":
+                try:
+                    # Extract the co-insured index from the path
+                    index = json_path.split('[')[1].split(']')[0]
+                    if index is not None:
+                        marital_status_path = f"questionaire_repo.value.co_insured.value[{index}].value.marital_status.value"
+                        # Update marital status to "Married"
+                        marital_tokens = _parse_tokens(marital_status_path)
+                        marital_cur = form.context.data
+                        for token in marital_tokens[:-1]:
+                            marital_cur = marital_cur[token]
+                        marital_final = marital_tokens[-1]
+                        marital_cur[marital_final] = "Married"
+                        log_to_file(f"Auto-updated marital status to 'Married' for co-insured {index} when relationship set to '{value}'")
+                except Exception as e:
+                    log_to_file(f"Error auto-updating marital status for co-insured: {str(e)}")
+        
+
+        # Auto-sync co-insured data to drivers and increase driver count
+
+
+
+        # Handle additional_drivers boolean field
+        elif json_path.endswith("questionaire_repo.value.additional_drivers.value"):
+            try:
+                if value is False:
+                    # Add one more driver but don't store the false value
+                    current_drivers = form.context.data["questionaire_repo"]["value"]["number_of_drivers"]["value"] or 1
+                    new_driver_count = current_drivers + 1
+                    
+                    # Update number_of_drivers
+                    form.context.data["questionaire_repo"]["value"]["number_of_drivers"]["value"] = new_driver_count
+                    
+                    # Resize driver list
+                    resize_list_with_ordinal(
+                        form.context.data,
+                        ["questionaire_repo", "value", "driver_details", "value"],
+                        new_driver_count
+                    )
+                    
+                    # Keep additional_drivers as None (don't store false)
+                    form.context.data["questionaire_repo"]["value"]["additional_drivers"]["value"] = None
+                    
+                    update_assigned_driver_enums(form.context.data)
+                    log_to_file(f"Added one more driver (total: {new_driver_count}) - additional_drivers kept as None")
+                    
+                elif value is True:
+                    # Set additional_drivers to true (no more drivers wanted)
+                    form.context.data["questionaire_repo"]["value"]["additional_drivers"]["value"] = True
+                    log_to_file("Set additional_drivers to True - no more drivers will be added")
+                    
+            except Exception as e:
+                log_to_file(f"Error handling additional_drivers: {str(e)}")
+
+        # Handle additional_co_insured boolean field  
+        elif json_path.endswith("questionaire_repo.value.additional_co_insured.value"):
+            try:
+                if value is False:
+                    # Add one more co-insured but don't store the false value
+                    current_co_insured = form.context.data["questionaire_repo"]["value"]["number_of_co_insured"]["value"] or 0
+                    new_co_insured_count = current_co_insured + 1
+                    
+                    # Update number_of_co_insured
+                    form.context.data["questionaire_repo"]["value"]["number_of_co_insured"]["value"] = new_co_insured_count
+                    
+                    # Resize co-insured list
+                    resize_list_with_ordinal(
+                        form.context.data,
+                        ["questionaire_repo", "value", "co_insured", "value"],
+                        new_co_insured_count
+                    )
+
+                    
+                    
+                    # Also increase drivers to accommodate new co-insured
+                
+                    current_drivers = len(form.context.data["questionaire_repo"]["value"]["driver_details"]["value"])
+                    required_drivers = current_drivers + 1
+                    if current_drivers < required_drivers:
+                        resize_list_with_ordinal(
+                            form.context.data,
+                            ["questionaire_repo", "value", "driver_details", "value"],
+                            required_drivers
+                        )
+                        form.context.data["questionaire_repo"]["value"]["number_of_drivers"]["value"] = required_drivers
+                    
+                    # Keep additional_co_insured as None (don't store false)
+                    form.context.data["questionaire_repo"]["value"]["additional_co_insured"]["value"] = None
+                    
+                    update_assigned_driver_enums(form.context.data)
+                    log_to_file(f"Added one more co-insured (total: {new_co_insured_count}) - additional_co_insured kept as None")
+                    
+                elif value is True:
+                    # Set additional_co_insured to true (no more co-insured wanted)
+                    form.context.data["questionaire_repo"]["value"]["additional_co_insured"]["value"] = True
+                    log_to_file("Set additional_co_insured to True - no more co-insured will be added")
+                    
+            except Exception as e:
+                log_to_file(f"Error handling additional_co_insured: {str(e)}")
+
+        # Handle additional_vehicles boolean field
+        elif json_path.endswith("questionaire_repo.value.additional_vehicles.value"):
+            try:
+                if value is False:
+                    # Add one more vehicle but don't store the false value
+                    current_vehicles = form.context.data["questionaire_repo"]["value"]["number_of_vehicles"]["value"] or 0
+                    new_vehicle_count = current_vehicles + 1
+                    
+                    # Update number_of_vehicles
+                    form.context.data["questionaire_repo"]["value"]["number_of_vehicles"]["value"] = new_vehicle_count
+                    
+                    # Resize vehicle list
+                    resize_list_with_ordinal(
+                        form.context.data,
+                        ["questionaire_repo", "value", "vehicle_details", "value"],
+                        new_vehicle_count
+                    )
+                    
+                    # Keep additional_vehicles as None (don't store false)
+                    form.context.data["questionaire_repo"]["value"]["additional_vehicles"]["value"] = None
+                    
+                    update_assigned_driver_enums(form.context.data)
+                    log_to_file(f"Added one more vehicle (total: {new_vehicle_count}) - additional_vehicles kept as None")
+                    
+                elif value is True:
+                    # Set additional_vehicles to true (no more vehicles wanted)
+                    form.context.data["questionaire_repo"]["value"]["additional_vehicles"]["value"] = True
+                    log_to_file("Set additional_vehicles to True - no more vehicles will be added")
+                    
+            except Exception as e:
+                log_to_file(f"Error handling additional_vehicles: {str(e)}")
+        if "questionaire_repo.value.co_insured.value.[" in json_path:
+            try:
+                # Extract co-insured index from the path
+                index = json_path.split('[')[1].split(']')[0]
+                if index is not None:
+                    co_insured_index = int(index)
+                    driver_index = co_insured_index + 1  # co-insured[0] -> driver[1], co-insured[1] -> driver[2], etc.
+                    
+                    # Get current number of drivers
+                    current_drivers = len(form.context.data["questionaire_repo"]["value"]["driver_details"]["value"])
+                    required_drivers = driver_index + 1  # +1 because we need driver[driver_index] to exist
+                    
+                    # Increase number of drivers if needed
+                    if current_drivers < required_drivers:
+                        resize_list_with_ordinal(
+                            form.context.data,
+                            ["questionaire_repo", "value", "driver_details", "value"],
+                            required_drivers
+                        )
+                        # Update number_of_drivers field
+                        form.context.data["questionaire_repo"]["value"]["number_of_drivers"]["value"] = required_drivers
+                        log_to_file(f"Auto-increased number of drivers to {required_drivers} to accommodate co-insured {co_insured_index}")
+                    
+                    # Copy co-insured data to corresponding driver
+                    co_insured_data = form.context.data["questionaire_repo"]["value"]["co_insured"]["value"][co_insured_index]["value"]
+                    driver_data = form.context.data["questionaire_repo"]["value"]["driver_details"]["value"][driver_index]["value"]
+                    
+                    # Define fields to sync from co-insured to driver
+                    new_sync_fields = [
+                        "name", "date_of_birth", "gender", "relationship", 
+                        "marital_status", "occupation", "education"
+                    ]
+                    
+                    for field in new_sync_fields:
+                        if field in co_insured_data and field in driver_data:
+                            if field == "name":
+                                # Copy all name sub-fields
+                                for name_field in ["first_name", "middle_name", "last_name"]:
+                                    if (co_insured_data[field]["value"][name_field]["value"] is not None and 
+                                        co_insured_data[field]["value"][name_field]["value"] != ""):
+                                        driver_data[field]["value"][name_field]["value"] = co_insured_data[field]["value"][name_field]["value"]
+                            else:
+                                # Copy simple field
+                                if (co_insured_data[field]["value"] is not None and 
+                                    co_insured_data[field]["value"] != ""):
+                                    driver_data[field]["value"] = co_insured_data[field]["value"]
+                    
+                    # Update assigned driver enums after adding new drivers
+                    update_assigned_driver_enums(form.context.data)
+                    
+                    log_to_file(f"Auto-synced co-insured {co_insured_index} data to driver {driver_index}")
+                    
+            except Exception as e:
+                log_to_file(f"Error auto-syncing co-insured to driver: {str(e)}")
 
     except Exception as e:
         log_to_file(f"error in multiplying fields: {path} {str(e)}")
@@ -1394,7 +1730,26 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
 
 
 normalise(form)
-data = Form(data=form, history=[],language_processor_response=[])
+data = Form(data=form, history=[],language_processor_response=[],input_tokens=0,output_tokens=0,cached_tokens=0)
+
+# Token pricing constants (per 1M tokens)
+INPUT_TOKEN_PRICE = 0.80  # $0.80 / 1M tokens
+CACHED_TOKEN_PRICE = 0.20  # $0.20 / 1M tokens  
+OUTPUT_TOKEN_PRICE = 3.20  # $3.20 / 1M tokens
+
+def calculate_costs(input_tokens, cached_tokens, output_tokens):
+    """Calculate costs for different token types"""
+    input_cost = (input_tokens / 1_000_000) * INPUT_TOKEN_PRICE
+    cached_cost = (cached_tokens / 1_000_000) * CACHED_TOKEN_PRICE
+    output_cost = (output_tokens / 1_000_000) * OUTPUT_TOKEN_PRICE
+    total_cost = input_cost + cached_cost + output_cost
+    
+    return {
+        'input_cost': input_cost,
+        'cached_cost': cached_cost, 
+        'output_cost': output_cost,
+        'total_cost': total_cost
+    }
 
 @function_tool(strict_mode=False)
 async def get_field(field_description : str):
@@ -1436,6 +1791,23 @@ async def get_field(field_description : str):
               )
 
     response = response.to_dict()
+    prompt_tokens = response["usage"]["prompt_tokens"]
+    completion_tokens = response["usage"]["completion_tokens"]
+    cached_tokens = response["usage"].get("prompt_tokens_details", {}).get("cached_tokens", 0)
+    
+    # Calculate actual input tokens (total input - cached)
+    actual_input_tokens = prompt_tokens - cached_tokens
+    
+    data.input_tokens += int(actual_input_tokens)
+    data.output_tokens += int(completion_tokens)
+    data.cached_tokens += int(cached_tokens)
+    
+    costs = calculate_costs(actual_input_tokens, cached_tokens, completion_tokens)
+    print(f"Input Tokens: {actual_input_tokens} - Cost: ${costs['input_cost']:.6f}")
+    print(f"Cached Tokens: {cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
+    print(f"Output Tokens: {completion_tokens} - Cost: ${costs['output_cost']:.6f}")
+    print(f"Total Cost: ${costs['total_cost']:.6f}")
+    
     response = json.loads(response["choices"][0]["message"]["content"])
     print("get_field response: ",response)
     if response["found"]:
@@ -1447,85 +1819,116 @@ async def get_field(field_description : str):
   except Exception as e:
       log_to_file(str(e))
 
-async def language_processor(data,message):
-  print("language_processor called with message: ",message)
-  descriptions = extract_descriptions(data.data)
-  nf = next_field(data.data)
-  history = data.history
-  prompt = f"""
-  you are a language processor for an agent
-  you have access to
-  chat_history - chat history between user and agent
-  user_response - user response to agent
-  next_field - next field that is asked to user
-  descriptions - descriptions of all fields in form
+def get_today_date():
+  """Returns today's date in dd-mm-yyyy format"""
+  return str(datetime.now().strftime("%d-%m-%Y"))
 
-  you task is to analyze user_response and understand the user's intent and based on that catagorize it into one of the following catagories:
-  catagory 1 : update
-  catagory 2 : delete
-  catagory 3 : find
-  catagory 4 : message
+async def language_processor(data, message):
+    try:
+      print("language_processor called with message: ", message)
+      log_to_file(f"language_processor called with message: {message}")
+      descriptions = extract_descriptions(data.data)
+      nf = next_field(data.data)
+      history = data.history
+      
+      prompt = f"""
+      you are a language processor for an agent
+      you have access to
+      chat_history - chat history between user and agent
+      user_response - user's response to agent
+      next_field - next field that is asked to user
+      descriptions - descriptions of all fields in form
 
-  you need to figure out what needs to be updated, deleted, found or message based on data you are given.
+      you task is to analyze user_response and understand the user's intent and based on that catagorize it into one of the following catagories:
+      catagory 1 : update
+      catagory 2 : delete
+      catagory 3 : find
+      catagory 4 : message
 
-  eg: if user response is 'my name is john doe' your response should be {{"command_type": "update","fields":{{ "First name of the insured": "john","Middle name of the insured":"","Last name of the insured":"doe"}}}} 
-  or if user response is 'new colony udaipur rajasthan 313001' your response should be {{"command_type": "find","fields":{{ "Primary street address":"new colony","City of residence":"udaipur","State of residence":"rajasthan","ZIP or postal code":"313001"}}}}
-  or if user response is 'delete driver where name is john' your response should be {{"command_type": "delete","fields":{{ "List of driver profiles": "delete where driver name in john"}}}} 
-  or if user response is 'what is driver one's name' your response should be {{"command_type": "find","fields":{{ "field_description": "Driver one's name"}}}} 
-  if user response does not contain any information about next_field then return {{"command_type": "message","message":"message from user"}}
+      you need to figure out what needs to be updated, deleted, found or message based on data you are given.
 
-  if user asks for 'add another [co-insured, driver, vehicle]' then return {{"command_type": "update","fields":{{ "number_of_[co-insured, driver, vehicle]": "add another"}}}}
+      eg: if user response is 'my name is john doe' your response should be {{"command_type": "update","fields":{{ "First name of the insured": "john","Middle name of the insured":"","Last name of the insured":"doe"}}}} 
+      or if user response is 'new colony udaipur rajasthan 313001' your response should be {{"command_type": "find","fields":{{ "Primary street address":"new colony","City of residence":"udaipur","State of residence":"rajasthan","ZIP or postal code":"313001"}}}}
+      or if user response is 'delete driver where name is john' your response should be {{"command_type": "delete","fields":{{ "List of driver profiles": "delete where driver name in john"}}}} 
+      or if user response is 'what is driver one's name' your response should be {{"command_type": "find","fields":{{ "field_description": "Driver one's name"}}}} 
+      if user response does not contain any information about next_field then return {{"command_type": "message","message":"message from user"}}
 
-  if user ask to skip or leave a field blank that where 'is_required' is true return {{"command_type":"reply_to_user","message":"message saying that field is required please provide the information with a friendly tone"}} message should be in a friendly tone.
-  also if user provide invalid information for a field like negative numbers,invalid format for email or wrong input for enum or any other invalid information then return {{"command_type":"reply_to_user","message":"message saying that field is required please provide the information with a friendly tone"}} message should be in a friendly tone.
-  
-  if user provide information that is not in next_field then catagorize and make fields based on descriptions.
+      if user asks for 'add another [co-insured, driver, vehicle]' then return {{"command_type": "update","fields":{{ "number_of_[co-insured, driver, vehicle]": "add another"}}}}
+      "number_of_[co-insured, driver, vehicle]" can be '0'
 
-  field name should be strictly from descriptions.
+      if user ask to skip or leave a field blank that where 'is_required' is true return {{"command_type":"reply_to_user","message":"message saying that field is required please provide the information with a friendly tone"}} message should be in a friendly tone.
+      also if user provide invalid information for a field like negative numbers,invalid format for email or wrong input for enum or any other invalid information then return {{"command_type":"reply_to_user","message":"message saying that field is required please provide the information with a friendly tone"}} message should be in a friendly tone.
+      also check for dates today's date is {get_today_date()} date of birth should be in the past and effective date should be in the future.
 
-  if user response is not in descriptions then return {{"command_type": "message","message":"message from user"}}
+      if user says 'same as before : value' or 'same as this field : value' or 'same as previous field : value' then return {{"command_type":"update","fields":{{"field_description from next_field":"value from user"}}}} do not pass 'same as before' or 'same as this field' or 'same as previous field' text in value. 
+      if user provide information that is not in next_field then catagorize and make fields based on descriptions.
 
-  if user asks for any information put that in find catagory.
-  
-  your response should strictly be in json
+      field name should be strictly from descriptions.
 
-  all dates should be in this format dd-mm-yyyy
+      if user response is not in descriptions then return {{"command_type": "message","message":"message from user"}}
 
-  think for longer while analyzing user_response and understand the user's intent.
+      if user asks for any information put that in find catagory.
+      
+      your response should strictly be in json
 
-  chat_history : {history} 
-  user_response : {message}
-  next_field: {nf}
-  descriptions: {descriptions}
-  """
-  client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+      all dates should be in this format dd-mm-yyyy
 
-  response = await client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant designed to output JSON.",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"{prompt}",
-                    },
-                ],
-                model = 'gpt-4.1-mini',
-                max_tokens=16384,
-                response_format={"type": "json_object"},
-            )
+      think for longer while analyzing user_response and understand the user's intent.
 
-  response = response.to_dict()
-  response = json.loads(response["choices"][0]["message"]["content"])
-  if response['command_type'] == 'reply_to_user':
-      data.history.append({"role":"assistant","content":response['message']})
-  data.language_processor_response.append(response)
-  data.language_processor_response = data.language_processor_response[-5:]
-  history.append({"role":"user","content":message})
-  data.history = history[-5:]
-  log_to_file(f"language processor response: {response}")
-  return response
+      chat_history : {history} 
+      user_response : {message}
+      next_field: {nf}
+      descriptions: {descriptions}
+      """
+      client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+      response = await client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a helpful assistant designed to output JSON.",
+                        },
+                        {
+                            "role": "user",
+                            "content": f"{prompt}",
+                        },
+                    ],
+                    model = 'gpt-4.1-mini',
+                    max_tokens=16384,
+                    response_format={"type": "json_object"},
+                )
+
+      response = response.to_dict()
+      print("language processor response: ",response)
+      prompt_tokens = response["usage"]["prompt_tokens"]
+      completion_tokens = response["usage"]["completion_tokens"]
+      cached_tokens = response["usage"].get("prompt_tokens_details", {}).get("cached_tokens", 0)
+      
+      # Calculate actual input tokens (total input - cached)
+      actual_input_tokens = prompt_tokens - cached_tokens
+      
+      data.input_tokens += int(actual_input_tokens)
+      data.output_tokens += int(completion_tokens)
+      data.cached_tokens += int(cached_tokens)
+      
+      costs = calculate_costs(actual_input_tokens, cached_tokens, completion_tokens)
+      print(f"Input Tokens: {actual_input_tokens} - Cost: ${costs['input_cost']:.6f}")
+      print(f"Cached Tokens: {cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
+      print(f"Output Tokens: {completion_tokens} - Cost: ${costs['output_cost']:.6f}")
+      print(f"Total Cost: ${costs['total_cost']:.6f}")
+      
+      response = json.loads(response["choices"][0]["message"]["content"])
+      if response['command_type'] == 'reply_to_user':
+          data.history.append({"role":"assistant","content":response['message']})
+      data.language_processor_response.append(response)
+      data.language_processor_response = data.language_processor_response[-5:]
+      history.append({"role":"user","content":message})
+      data.history = history[-5:]
+      log_to_file(f"language processor response: {response}")
+      return response
+    except Exception as e:
+      log_to_file(f"error in language processor: {e}")
+      return {"command_type": "message","message":"message from user"}
 
 
 async def json_agent(data,message):
@@ -1580,7 +1983,7 @@ async def json_agent(data,message):
     strictly do not update values where type is 'object' you can only update childrens value of that object
 
     if command is asked to delete a field that is not in json then dont return message saying field not found do not delete unneccesary fields.
-
+    if user ask 'same as before' or 'same as this field' or 'same as previous field' then strictly get path and value using get_field and update_field with that path and value.
 
     3.Data integrity rules:
 
@@ -1598,6 +2001,8 @@ async def json_agent(data,message):
   }}
 
  """
+  
+
 
   agent = Agent[Form](
       name="Assistant",
@@ -1611,6 +2016,23 @@ async def json_agent(data,message):
   for attempt in range(retries):
       try:
           result = await Runner.run(agent, str(message), context=data, max_turns=30)
+          input_tokens_sum = sum(r.usage.input_tokens for r in result.raw_responses)
+          output_tokens_sum = sum(r.usage.output_tokens for r in result.raw_responses)
+          cached_tokens_sum = sum(r.usage.input_tokens_details.cached_tokens for r in result.raw_responses)
+          
+          # Calculate actual input tokens (total input - cached)  
+          actual_input_tokens_sum = input_tokens_sum - cached_tokens_sum
+          
+          data.input_tokens += int(actual_input_tokens_sum)
+          data.output_tokens += int(output_tokens_sum)
+          data.cached_tokens += int(cached_tokens_sum)
+          
+          costs = calculate_costs(actual_input_tokens_sum, cached_tokens_sum, output_tokens_sum)
+          print(f"Input Tokens: {actual_input_tokens_sum} - Cost: ${costs['input_cost']:.6f}")
+          print(f"Cached Tokens: {cached_tokens_sum} - Cost: ${costs['cached_cost']:.6f}")
+          print(f"Output Tokens: {output_tokens_sum} - Cost: ${costs['output_cost']:.6f}")
+          print(f"Total Cost: ${costs['total_cost']:.6f}")
+          
           break
       except Exception as e:
           last_error = e
@@ -1645,6 +2067,8 @@ async def validation_agent(data):
 
     strictly ignore all the format and datatype mismatches if the values's meaning are same like ( yes == true, '1' == 1 or '1' == 1.0 or 31/05/2003 == 31-05-2003).
 
+    if command field is to 'Do not add more co-insured/driver/vehicle' then skip validation and return empty list.
+
     if the command is to delete a field that is not in filled_fields then dont return any command.
 
     if not then return a list of commands to fix them.
@@ -1659,7 +2083,6 @@ async def validation_agent(data):
     "Incorrect value for dob: expected 31/05/2003, found 30/05/2003",
     "Copy insured address into mailing address field",
     ]
-
  
     think for longer while analyzing the command and intent behind each command.
   """
@@ -1683,6 +2106,24 @@ async def validation_agent(data):
             )
 
   response = response.to_dict()
+  prompt_tokens = response["usage"]["prompt_tokens"]
+  completion_tokens = response["usage"]["completion_tokens"]
+  cached_tokens = response["usage"].get("prompt_tokens_details", {}).get("cached_tokens", 0)
+  
+  # Calculate actual input tokens (total input - cached)
+  actual_input_tokens = prompt_tokens - cached_tokens
+  
+  data.input_tokens += int(actual_input_tokens)
+  data.output_tokens += int(completion_tokens)
+  data.cached_tokens += int(cached_tokens)
+  
+  costs = calculate_costs(actual_input_tokens, cached_tokens, completion_tokens)
+  print(f"Input Tokens: {actual_input_tokens} - Cost: ${costs['input_cost']:.6f}")
+  print(f"Cached Tokens: {cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
+  print(f"Output Tokens: {completion_tokens} - Cost: ${costs['output_cost']:.6f}")
+  print(f"Total Cost: ${costs['total_cost']:.6f}")
+  
+  
   response = json.loads(response["choices"][0]["message"]["content"])
   log_to_file(f"validation_agent response: {response}")
   return response
@@ -1723,7 +2164,13 @@ async def reply_agent(data,message):
     - Provide suggested options (enums) if applicable.
 
   if you are asking for multiple fields at once then ask them in bullet points and only ask for fields from next_field.
+  do not ask for fields that are not in next_field strictly.
 
+  do not ask date in any structure.
+
+  give suggestions as "same as previous field : value" or "same as this field : value" or "same as before : value" if same information is already filled in previous field for all fields combined in next_field.
+  do not suggest same value two times and only one suggestion from multiple enums not all.  
+  if you are providing suggestion for multiple fields provide that in a single suggestion.
   Response Format:
   {{
     message: string,         # The message content that will be sent to user should be in friendly tone.
@@ -1755,6 +2202,24 @@ async def reply_agent(data,message):
             )
 
   response = response.to_dict()
+  prompt_tokens = response["usage"]["prompt_tokens"]
+  completion_tokens = response["usage"]["completion_tokens"]
+  cached_tokens = response["usage"].get("prompt_tokens_details", {}).get("cached_tokens", 0)
+  
+  # Calculate actual input tokens (total input - cached)
+  actual_input_tokens = prompt_tokens - cached_tokens
+  
+  data.input_tokens += int(actual_input_tokens)
+  data.output_tokens += int(completion_tokens)
+  data.cached_tokens += int(cached_tokens)
+  
+  costs = calculate_costs(actual_input_tokens, cached_tokens, completion_tokens)
+  print(f"Input Tokens: {actual_input_tokens} - Cost: ${costs['input_cost']:.6f}")
+  print(f"Cached Tokens: {cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
+  print(f"Output Tokens: {completion_tokens} - Cost: ${costs['output_cost']:.6f}")
+  print(f"Total Cost: ${costs['total_cost']:.6f}")
+
+  
   response = json.loads(response["choices"][0]["message"]["content"])
   data.history.append({"role":"assistant","content":f"message: {response['message']} - enums: {response['enums']} - suggestion_values: {response['suggestion_values']}"})
   log_to_file(f"reply_agent response: {response}")
@@ -1788,6 +2253,13 @@ async def main():
     while True:
         user_input = input("User: ")
         response = await chat_pipeline(data, user_input)
+        costs = calculate_costs(data.input_tokens, data.cached_tokens, data.output_tokens)
+        total_tokens = data.input_tokens + data.cached_tokens + data.output_tokens
+        
+        print(f"Input Tokens: {data.input_tokens} - Cost: ${costs['input_cost']:.6f}")
+        print(f"Cached Tokens: {data.cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
+        print(f"Output Tokens: {data.output_tokens} - Cost: ${costs['output_cost']:.6f}")
+        print(f"Total Tokens: {total_tokens} - Total Cost: ${costs['total_cost']:.6f}")
         print(response)
 
         if next_field(form) is None:
@@ -1795,7 +2267,5 @@ async def main():
             break
 
 
-import asyncio
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(main())

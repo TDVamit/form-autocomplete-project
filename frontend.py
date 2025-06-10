@@ -224,7 +224,10 @@ if not st.session_state.app_started:
             st.session_state.session_data = Form(
                 data=session_form_data, 
                 history=[],
-                language_processor_response=[]
+                language_processor_response=[],
+                input_tokens=0,
+                output_tokens=0,
+                cached_tokens=0
             )
             
             # Initialize other session state variables
@@ -346,6 +349,42 @@ if not st.session_state.app_started:
     """, height=0)
     
     st.stop()
+
+# Add token counter overlay using JavaScript
+# REMOVED - Token counter is now in form header
+# if "session_data" in st.session_state and hasattr(st.session_state.session_data, 'total_tokens'):
+#     total_tokens = st.session_state.session_data.total_tokens
+#     
+#     # Format tokens in k/m/b terms
+#     def format_number(num):
+#         if num >= 1_000_000_000:
+#             return f"{num/1_000_000_000:.1f}b"
+#         elif num >= 1_000_000:
+#             return f"{num/1_000_000:.1f}m"
+#         elif num >= 1_000:
+#             return f"{num/1_000:.1f}k"
+#         else:
+#             return str(num)
+#     
+#     formatted_tokens = format_number(total_tokens)
+#     
+#     st.markdown(f"""
+#     <div style="
+#         float: right;
+#         background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%);
+#         color: white;
+#         padding: 8px 16px;
+#         border-radius: 20px;
+#         font-size: 12px;
+#         font-weight: 600;
+#         box-shadow: 0 4px 15px rgba(0, 132, 255, 0.4);
+#         margin-bottom: 15px;
+#         backdrop-filter: blur(10px);
+#         border: 1px solid rgba(255, 255, 255, 0.1);
+#     ">
+#         🔢 Total Tokens: {formatted_tokens}
+#     </div>
+#     """, unsafe_allow_html=True)
 
 # Main app interface (only shows after start button is pressed)
 
@@ -830,7 +869,7 @@ st.markdown("""
     background: rgba(10, 10, 10, 0.9) !important;
     color: #ffffff !important;
     border: 2px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 12px !important;
+    border-radius: 0px !important;
     padding: 12px 16px !important;
     box-shadow: 
         0 4px 15px rgba(0, 0, 0, 0.4),
@@ -858,7 +897,7 @@ st.markdown("""
     background: rgba(10, 10, 10, 0.9) !important;
     color: #ffffff !important;
     border: 2px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 12px !important;
+    border-radius: 0px !important;
     box-shadow: 
         0 4px 15px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
@@ -872,7 +911,7 @@ st.markdown("""
     background: rgba(10, 10, 10, 0.9) !important;
     color: #ffffff !important;
     border: 2px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 12px !important;
+    border-radius: 0px !important;
     box-shadow: 
         0 4px 15px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
@@ -1004,22 +1043,92 @@ div[data-testid="stSuccess"] {
 
 /* Chat input enhancement */
 div[data-testid="stChatInput"] > div {
-    background: rgba(0, 0, 0, 0.9) !important;
-    border-radius: 15px !important;
-    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(30, 30, 30, 0.95) !important;
+    border-radius: 25px !important;
+    border: 2px solid #0084ff !important;
     box-shadow: 
-        0 6px 20px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+        0 6px 20px rgba(0, 132, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
     transition: all 0.3s ease !important;
+    overflow: hidden !important;
+    padding: 6px 8px !important;
+    margin: 10px 0 !important;
 }
 
 div[data-testid="stChatInput"] > div:focus-within {
-    border-color: #0084ff !important;
+    border-color: #0066cc !important;
     box-shadow: 
-        0 0 0 3px rgba(0, 132, 255, 0.1),
-        0 8px 25px rgba(0, 0, 0, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        0 0 0 3px rgba(0, 132, 255, 0.2),
+        0 8px 25px rgba(0, 132, 255, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
     transform: translateY(-2px) !important;
+}
+
+/* Enhanced chat input field styling */
+div[data-testid="stChatInput"] input {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-size: 15px !important;
+    padding: 10px 16px !important;
+    border-radius: 20px !important;
+    width: calc(100% - 50px) !important;
+    box-sizing: border-box !important;
+    margin-right: 8px !important;
+}
+
+div[data-testid="stChatInput"] input::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-style: normal !important;
+}
+
+div[data-testid="stChatInput"] input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+/* Chat input button styling */
+div[data-testid="stChatInput"] button {
+    background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%) !important;
+    border: none !important;
+    border-radius: 18px !important;
+    color: white !important;
+    padding: 10px 12px !important;
+    margin: 0px 4px !important;
+    box-shadow: 0 4px 15px rgba(0, 132, 255, 0.4) !important;
+    transition: all 0.2s ease !important;
+    min-width: 40px !important;
+    height: 38px !important;
+    flex-shrink: 0 !important;
+}
+
+div[data-testid="stChatInput"] button:hover {
+    background: linear-gradient(135deg, #0066cc 0%, #004499 100%) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 6px 20px rgba(0, 132, 255, 0.6) !important;
+}
+
+div[data-testid="stChatInput"] button:active {
+    transform: scale(0.98) !important;
+    transition: all 0.1s ease !important;
+}
+
+/* Token counter overlay */
+.token-counter {
+    position: fixed;
+    top: 80px;
+    right: 30px;
+    background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(0, 132, 255, 0.4);
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1322,22 +1431,64 @@ def process_step_by_step():
             st.session_state.processing_step = 0
             st.rerun()
 
-# Add a reset button at the top right corner
-col_spacer, col_reset = st.columns([10, 1])
-with col_reset:
-    if st.button('Reset', key='reset_all', help='Reset form, chat, and logs'):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        # Clear the live logs as well
-        from main import LIVE_LOGS
-        LIVE_LOGS.clear()
-        st.rerun()
+
 
 # Split the page into two columns
 col1, col2 = st.columns([2, 2])
 
 with col1:
-    st.subheader("💬 Chat")
+    # Create header row with Chat and total tokens
+    chat_header_col1, chat_header_col2 = st.columns([2, 4])
+    
+    with chat_header_col1:
+        st.subheader("💬 Chat")
+    
+    with chat_header_col2:
+        if "session_data" in st.session_state and hasattr(st.session_state.session_data, 'input_tokens') and hasattr(st.session_state.session_data, 'output_tokens'):
+            input_tokens = st.session_state.session_data.input_tokens
+            output_tokens = st.session_state.session_data.output_tokens
+            cached_tokens = getattr(st.session_state.session_data, 'cached_tokens', 0)
+            total_tokens = input_tokens + output_tokens + cached_tokens
+            
+            # Calculate costs
+            input_cost = (input_tokens / 1_000_000) * 0.80
+            cached_cost = (cached_tokens / 1_000_000) * 0.20
+            output_cost = (output_tokens / 1_000_000) * 3.20
+            total_cost = input_cost + cached_cost + output_cost
+            
+            # Format tokens in k/m/b terms
+            def format_number(num):
+                if num >= 1_000_000_000:
+                    return f"{num/1_000_000_000:.1f}b"
+                elif num >= 1_000_000:
+                    return f"{num/1_000_000:.1f}m"
+                elif num >= 1_000:
+                    return f"{num/1_000:.1f}k"
+                else:
+                    return str(num)
+            
+            formatted_input = format_number(input_tokens)
+            formatted_cached = format_number(cached_tokens)
+            formatted_output = format_number(output_tokens)
+            formatted_total = format_number(total_tokens)
+            
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%);
+                color: white;
+                padding: 4px 6px;
+                border-radius: 15px;
+                font-size: 13px;
+                font-weight: 600;
+                box-shadow: 0 3px 10px rgba(0, 132, 255, 0.4);
+                text-align: center;
+                margin-top: 18px;
+                line-height: 1.2;
+                white-space: nowrap;
+            ">
+                Tokens - 🔤 In: {formatted_input} | 💾 Cache: {formatted_cached} | 📤 Out: {formatted_output} | 📊 Total: {formatted_total} - 💰${total_cost:.3f}
+            </div>
+            """, unsafe_allow_html=True)
     
     # Create a scrollable container for chat with same height as form
     with st.container(height=690):
@@ -1415,9 +1566,111 @@ with col1:
         st.success("🎉 Thank you! All required fields are completed.")
         user_input = None
 
-with col2:
-    st.subheader("📋 Form Data")
+# Initialize session state for fill temp popup
+if "show_fill_temp_popup" not in st.session_state:
+    st.session_state.show_fill_temp_popup = False
+
+def render_fill_temp_field(field_name, field_data, current_path="", level=0):
+    """Recursively render form fields with 'fill till here' buttons for temp data filling"""
+    if not isinstance(field_data, dict):
+        return
     
+    field_type = field_data.get("type")
+    description = field_data.get("description", field_name)
+    value = field_data.get("value")
+    is_required = field_data.get("is_required", False)
+    json_path = field_data.get("json_path", "")
+    
+    # Skip fields with type "list" and "object" - don't show them in popup
+    if field_type in ["list", "object"]:
+        # Still traverse into their children but don't render the container
+        if field_type == "object" and value and isinstance(value, dict):
+            for sub_field_name, sub_field_data in value.items():
+                render_fill_temp_field(sub_field_name, sub_field_data, current_path, level)
+        elif field_type == "list" and value and isinstance(value, list):
+            for i, item in enumerate(value):
+                if isinstance(item, dict) and item.get("type") == "object":
+                    item_value = item.get("value", {})
+                    for sub_field_name, sub_field_data in item_value.items():
+                        render_fill_temp_field(sub_field_name, sub_field_data, current_path, level)
+        return
+    
+    # Build the current path for this field
+    if current_path:
+        full_path = f"{current_path}.{field_name}" if not current_path.endswith(f".{field_name}") else current_path
+    else:
+        full_path = field_name
+    
+    # Add indentation based on nesting level  
+    indent = "  " * level
+    
+    # Create two columns: field info and fill button - only for primitive types
+    if field_type in ["string", "integer", "boolean", "date", "enum"]:
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            # Show field information without path and type
+            required_marker = " *" if is_required else ""
+            value_display = str(value) if value is not None else "None"
+            st.write(f"{indent}**{description}**{required_marker}")
+            st.write(f"{indent}Current: {value_display}")
+        
+        with col2:
+            if st.button("🔧 Fill Till Here", key=f"fill_temp_{full_path}_{id(field_data)}", help=f"Fill temporary data up to: {description}"):
+                # Call the fill_form_temp function
+                try:
+                    from main import fill_form_temp
+                    fill_form_temp(json_path, st.session_state.session_data.data)
+                    st.success(f"✅ Filled temp data till: {description}")
+                    # Update the form snapshot to reflect changes
+                    st.session_state.form_snapshot = json.loads(json.dumps(st.session_state.session_data.data))
+                    # Close the popup
+                    st.session_state.show_fill_temp_popup = False
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Error filling temp data: {str(e)}")
+        
+        # Add visual gap between fields
+        st.markdown("---")
+
+# Fill Temp Data Popup Modal
+@st.dialog("🔧 Fill Temporary Data", width="large")
+def show_fill_temp_popup():
+    st.write("Click 'Fill Till Here' button next to any field to fill temporary data up to that point in the form.")
+    st.write("This will populate empty fields with sample data to help with testing.")
+    
+    # Add scrollable container for the form fields
+    with st.container(height=600):
+        if "session_data" in st.session_state:
+            for section_name, section_data in st.session_state.session_data.data.items():
+                render_fill_temp_field(section_name, section_data)
+    
+    # Close button
+    if st.button("❌ Close", use_container_width=True):
+        st.session_state.show_fill_temp_popup = False
+        st.rerun()
+
+with col2:
+    # Create header row with Form Data and buttons
+    form_header_col1, form_header_col2, form_header_col3 = st.columns([8, 3, 2])
+    
+    with form_header_col1:
+        st.subheader("📋 Form Data")
+    
+    with form_header_col2:
+        if st.button('🔧 Fill Temp Data', key='fill_temp_data', help='Fill form with temporary test data'):
+            st.session_state.show_fill_temp_popup = True
+            st.rerun()
+    
+    with form_header_col3:
+        if st.button('Reset', key='reset_form', help='Reset form, chat, and logs'):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            # Clear the live logs as well
+            from main import LIVE_LOGS
+            LIVE_LOGS.clear()
+            st.rerun()
+
     # Create a scrollable container for form data that takes full height
     with st.container(height=750):  # Large height to use most of screen space
         # Add scroll trigger point for next field
@@ -1545,6 +1798,10 @@ with col2:
             
             # Reset the flag after JavaScript is injected
             st.session_state.focus_next_field = False
+
+# Show the fill temp popup if requested
+if st.session_state.show_fill_temp_popup:
+    show_fill_temp_popup()
 
 # Handle suggestion clicks
 if st.session_state.suggestion_clicked:
