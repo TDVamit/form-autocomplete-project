@@ -500,7 +500,7 @@ form = {
       },
       "additional_co_insured":{
         "type":"boolean",
-        "description":"Do not add more co-insured",
+        "description":"Do not add more co-insured (ask user if they want to add more co-insured)",
         "is_required":False,
         "value":None
       },
@@ -779,7 +779,7 @@ form = {
       },
       "additional_drivers":{
         "type":"boolean",
-        "description":"Do not add more drivers",
+        "description":"Do not add more drivers(ask user if they want to add more drivers)",
         "is_required":False,
         "value":None
       },
@@ -969,7 +969,7 @@ form = {
       },
       "additional_vehicles":{
         "type":"boolean",
-        "description":"Do not add more vehicles",
+        "description":"Do not add more vehicles (ask user if they want to add more vehicles)",
         "is_required":False,
         "value":None
       }
@@ -979,74 +979,94 @@ form = {
 
 def isComplete(field_object):
     try:
-      field_type = field_object['type']
-      value = field_object['value']
+      field_type = field_object.get('type')
+      value = field_object.get('value')
+      
       if field_type not in {'list', 'object'}:
         return False if value is None else True
 
-      elif field_type ==  "object":
+      elif field_type == "object":
+        if not isinstance(value, dict):
+          return False
         for sub_field_name, sub_field_object in value.items():
-          if not isComplete(sub_field_object):
+          if isinstance(sub_field_object, dict) and not isComplete(sub_field_object):
             return False
         return True
 
       elif field_type == "list":
-        if not value:
+        if not value or not isinstance(value, list):
           return False
-        elif not isinstance(value[0],dict):
+        elif not isinstance(value[0], dict):
           return True
         for sub_field_object in value:
-          sub_field_object = {f'field':sub_field_object}
-          if not isComplete(sub_field_object):
-            return False
+          if isinstance(sub_field_object, dict):
+            sub_field_object = {f'field': sub_field_object}
+            if not isComplete(sub_field_object):
+              return False
         return True
     except Exception as e:
         log_to_file(f"exeption occured while finding if complete or not : { str(e)}")
         return True
 
 def normalise(field_dict, current_path=""):
-    for key, field in field_dict.items():
-        field_path = f"{current_path}.value.{key}" if current_path else f"{key}"
-        field["json_path"] = field_path + ".value"
+    try:
+      for key, field in field_dict.items():
+          field_path = f"{current_path}.value.{key}" if current_path else f"{key}"
+          field["json_path"] = field_path + ".value"
 
-        # Recurse into objects
-        if field["type"] == "object":
-            normalise(field["value"], field_path)
+          # Recurse into objects
+          if field["type"] == "object":
+              if "value" in field and isinstance(field["value"], dict):
+                  normalise(field["value"], field_path)
 
-        # Recurse into lists
-        elif field["type"] == "list":
-            for idx, item in enumerate(field["value"]):
-                item_path = f"{field_path}.value[{idx}]"
-                item["json_path"] = item_path + ".value"
-                if item["type"] == "object":
-                    normalise(item["value"], item_path)
+          # Recurse into lists
+          elif field["type"] == "list":
+              # Check if field["value"] exists and is actually a list
+              if "value" in field and isinstance(field["value"], list):
+                  for idx, item in enumerate(field["value"]):
+                      # Ensure item is a dictionary before accessing its properties
+                      if isinstance(item, dict):
+                          item_path = f"{field_path}.value[{idx}]"
+                          item["json_path"] = item_path + ".value"
+                          if item.get("type") == "object" and "value" in item and isinstance(item["value"], dict):
+                              normalise(item["value"], item_path)
+    except Exception as e:
+        log_to_file(f"exeption occured while normalising : { str(e)}")
+        
 
 def next_field(form_object):
   for field_name, field_object in form_object.items():
-    value = field_object['value']
+    if not isinstance(field_object, dict):
+      continue
+      
+    value = field_object.get('value')
 
-    if "ask_collected" in field_object and field_object['ask_collected']:
-      if not isComplete(field_object):
-        field_object["key"] = field_name
-        return field_object
+    if field_object.get("ask_collected") and not isComplete(field_object):
+      field_object["key"] = field_name
+      return field_object
 
-    if field_object['type'] == 'object':
+    if field_object.get('type') == 'object' and isinstance(value, dict):
         field = next_field(value)
         if field is not None:
           return field
 
-    elif field_object['type'] == 'list':
-      if value is None:
+    elif field_object.get('type') == 'list':
+      if value == []:
+          continue
+      elif value is None:
         return field_object
-      elif not isinstance(value[0],dict):
+      elif not isinstance(value, list) or not value:
         return None
-      for i,sub_field_object in enumerate(value):
-        sub_field_object = {f'{field_name} {i}':sub_field_object}
-        field = next_field(sub_field_object)
-        if field is not None:
-          return field
+      elif not isinstance(value[0], dict):
+        return None
+      for i, sub_field_object in enumerate(value):
+        if isinstance(sub_field_object, dict):
+          sub_field_object = {f'{field_name} {i}': sub_field_object}
+          field = next_field(sub_field_object)
+          if field is not None:
+            return field
 
-    else :
+    else:
       if not isComplete(field_object):
         field_object["key"] = field_name
         return field_object
@@ -1348,17 +1368,21 @@ def _clear_values(node: Any):
 
 
 def resize_list_with_ordinal(data: dict, list_path: List[Union[str,int]], new_count: int):
-    """
-    Generic helper: given the path tokens to a list (e.g.
-    ['questionaire_repo','value','driver_details','value']), clone index-0 template
-    and fix descriptions up to new_count, then sync enums.
-    """
-    # Navigate to parent of list
+
+    co_insured_list = {'type': 'object', 'description': 'Details for co‑insured one', 'is_required': False, 'value': {'name': {'type': 'object', 'description': "Co‑insured one's name", 'ask_collected': True, 'is_required': False, 'value': {'first_name': {'type': 'string', 'description': 'First name of co‑insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.name.value.first_name.value'}, 'middle_name': {'type': 'string', 'description': 'Middle name of co‑insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.name.value.middle_name.value'}, 'last_name': {'type': 'string', 'description': 'Last name of co‑insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.name.value.last_name.value'}}, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.name.value'}, 'date_of_birth': {'type': 'date', 'description': 'Date of birth of co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.date_of_birth.value'}, 'gender': {'type': 'enum', 'description': 'Gender of co-insured one', 'is_required': False, 'value': None, 'enum': ['Male', 'Female', 'Other'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.gender.value'}, 'relationship': {'type': 'enum', 'description': 'Relationship to the policyholder of co-insured one', 'is_required': False, 'value': None, 'enum': ['Spouse', 'Child', 'Parent', 'Other'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.relationship.value'}, 'marital_status': {'type': 'enum', 'description': 'Marital status of co-insured one', 'is_required': False, 'value': None, 'enum': ['Single', 'Married', 'Divorced', 'Widowed', 'Domestic Partner'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.marital_status.value'}, 'occupation': {'type': 'string', 'description': 'Occupation of co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.occupation.value'}, 'education': {'type': 'enum', 'description': 'Education level of co-insured one', 'is_required': False, 'value': None, 'enum': ['High School', 'Some College', 'Associates Degree', 'Bachelors', 'Masters', 'PhD'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.education.value'}, 'license_status': {'type': 'enum', 'description': 'License status of co-insured one', 'is_required': False, 'value': None, 'enum': ['Valid', 'Suspended', 'Expired'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.license_status.value'}, 'licensed_state': {'type': 'string', 'description': 'State where the co-insured one is licensed', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.licensed_state.value'}, 'license_number': {'type': 'string', 'description': "Co-insured one's license number (min. 8 chars)", 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.license_number.value'}, 'licensed_age': {'type': 'integer', 'description': 'Age when the co-insured one was licensed', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.licensed_age.value'}, 'rated': {'type': 'boolean', 'description': 'Whether the co-insured one is rated', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.rated.value'}, 'sr22_required': {'type': 'boolean', 'description': 'Whether an SR‑22 is required of co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.sr22_required.value'}, 'drive_for_rideshare': {'type': 'boolean', 'description': 'Whether the co-insured one uses rideshare services', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.drive_for_rideshare.value'}, 'drive_for_delivery': {'type': 'boolean', 'description': 'Whether the co-insured one uses delivery services', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.drive_for_delivery.value'}, 'driver_discounts': {'type': 'string', 'description': 'Any discounts applicable to the co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.driver_discounts.value'}, 'good_student_discount': {'type': 'boolean', 'description': 'Good student discount eligibility to co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.good_student_discount.value'}, 'mature_driver_discount': {'type': 'boolean', 'description': 'Mature driver discount eligibility to co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.mature_driver_discount.value'}, 'safe_driver_discount': {'type': 'boolean', 'description': 'Safe driver discount eligibility to co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.safe_driver_discount.value'}}, 'json_path': 'questionaire_repo.value.co_insured.value[0].value'}
+    driver_list = {'type': 'object', 'description': 'Details for driver one', 'is_required': False, 'value': {'name': {'type': 'object', 'description': "Driver one's name", 'ask_collected': True, 'is_required': False, 'value': {'first_name': {'type': 'string', 'description': 'First name of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.name.value.first_name.value'}, 'middle_name': {'type': 'string', 'description': 'Middle name of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.name.value.middle_name.value'}, 'last_name': {'type': 'string', 'description': 'Last name of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.name.value.last_name.value'}}, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.name.value'}, 'date_of_birth': {'type': 'date', 'description': 'Date of birth of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.date_of_birth.value'}, 'gender': {'type': 'enum', 'description': 'Gender of driver one', 'is_required': False, 'value': None, 'enum': ['Male', 'Female', 'Other'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.gender.value'}, 'relationship': {'type': 'enum', 'description': 'Relationship to the policyholder of driver one', 'is_required': False, 'value': 'Self', 'enum': ['Spouse', 'Child', 'Parent', 'Self', 'Other'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.relationship.value'}, 'marital_status': {'type': 'enum', 'description': 'Marital status of driver one', 'is_required': False, 'value': None, 'enum': ['Single', 'Married', 'Divorced', 'Widowed', 'Domestic Partner'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.marital_status.value'}, 'occupation': {'type': 'string', 'description': 'Occupation of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.occupation.value'}, 'education': {'type': 'enum', 'description': 'Education level of driver one', 'is_required': False, 'value': None, 'enum': ['High School', 'Some College', 'Associates Degree', 'Bachelors', 'Masters', 'PhD'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.education.value'}, 'license_status': {'type': 'enum', 'description': 'License status of driver one', 'is_required': False, 'value': None, 'enum': ['Valid', 'Suspended', 'Expired'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.license_status.value'}, 'licensed_state': {'type': 'string', 'description': 'State where the driver one is licensed', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.licensed_state.value'}, 'license_number': {'type': 'string', 'description': "Driver one's license number (min. 8 chars)", 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.license_number.value'}, 'licensed_age': {'type': 'integer', 'description': 'Age when the driver one was licensed', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.licensed_age.value'}, 'rated': {'type': 'boolean', 'description': 'Whether the driver one is rated', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.rated.value'}, 'sr22_required': {'type': 'boolean', 'description': 'Whether an SR‑22 is required of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.sr22_required.value'}, 'drive_for_rideshare': {'type': 'boolean', 'description': 'Whether the driver one uses rideshare services', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.drive_for_rideshare.value'}, 'drive_for_delivery': {'type': 'boolean', 'description': 'Whether the driver one uses delivery services', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.drive_for_delivery.value'}, 'driver_discounts': {'type': 'string', 'description': 'Any discounts applicable to the driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.driver_discounts.value'}, 'good_student_discount': {'type': 'boolean', 'description': 'Good student discount eligibility to driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.good_student_discount.value'}, 'mature_driver_discount': {'type': 'boolean', 'description': 'Mature driver discount eligibility to driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.mature_driver_discount.value'}, 'safe_driver_discount': {'type': 'boolean', 'description': 'Safe driver discount eligibility to driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.safe_driver_discount.value'}}, 'json_path': 'questionaire_repo.value.driver_details.value[0].value'}
+    vehicle_list ={'type': 'object', 'description': 'Details for vehicle one', 'is_required': False, 'value': {'vin': {'type': 'string', 'description': 'Vehicle one Identification Number', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.vin.value'}, 'make': {'type': 'string', 'description': 'Vehicle one make', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.make.value'}, 'model': {'type': 'string', 'description': 'Vehicle one model', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.model.value'}, 'year': {'type': 'integer', 'description': 'Vehicle one year', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.year.value'}, 'assigned_driver': {'type': 'enum', 'description': 'Assigned driver details of vehicle one', 'is_required': False, 'value': None, 'enum': [], 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.assigned_driver.value'}, 'garaged_state': {'type': 'string', 'description': 'State where the vehicle one is garaged', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaged_state.value'}, 'garaging_address': {'type': 'object', 'description': 'Vehicle one garaging address', 'ask_collected': True, 'is_required': False, 'value': {'street_address': {'type': 'string', 'description': 'Garaging street address of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value.street_address.value'}, 'city': {'type': 'string', 'description': 'Garaging city of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value.city.value'}, 'state': {'type': 'string', 'description': 'Garaging state of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value.state.value'}, 'zip_code': {'type': 'string', 'description': 'Garaging ZIP or postal code of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value.zip_code.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value'}, 'annual_miles': {'type': 'integer', 'description': 'Annual miles driven of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.annual_miles.value'}, 'vehicle_usage': {'type': 'enum', 'description': 'Vehicle one usage type', 'is_required': False, 'value': None, 'enum': ['Pleasure', 'Commute', 'Business', 'Rideshare'], 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.vehicle_usage.value'}, 'financed_vehicle': {'type': 'boolean', 'description': 'Is the vehicle one financed?', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.financed_vehicle.value'}, 'coverage_details': {'type': 'object', 'description': 'Vehicle‑specific coverages of vehicle one', 'is_required': False, 'value': {'comprehensive_deductible': {'type': 'enum', 'description': 'Comprehensive deductible amount of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.comprehensive_deductible.value'}, 'collision_deductible': {'type': 'enum', 'description': 'Collision deductible amount of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.collision_deductible.value'}, 'towing_coverage': {'type': 'object', 'description': 'Towing coverage details of vehicle one', 'is_required': False, 'value': {'coverage_limit': {'type': 'integer', 'description': 'Towing coverage limit of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.towing_coverage.value.coverage_limit.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.towing_coverage.value'}, 'rental_reimbursement': {'type': 'object', 'description': 'Rental reimbursement limits of vehicle one', 'is_required': False, 'value': {'daily_limit': {'type': 'integer', 'description': 'Daily limit for rental reimbursement of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.rental_reimbursement.value.daily_limit.value'}, 'total_limit': {'type': 'integer', 'description': 'Total limit for rental reimbursement of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.rental_reimbursement.value.total_limit.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.rental_reimbursement.value'}, 'full_glass_coverage': {'type': 'boolean', 'description': 'Full glass coverage included of vehicle one?', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.full_glass_coverage.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value'}, 'rented_on_turo': {'type': 'boolean', 'description': 'Is vehicle one rented on Turo?', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.rented_on_turo.value'}, 'ownership_type': {'type': 'enum', 'description': 'Vehicle one ownership type', 'is_required': False, 'value': None, 'enum': ['Owned', 'Leased', 'Financed'], 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.ownership_type.value'}, 'anti_theft_installed': {'type': 'boolean', 'description': 'Anti‑theft device installed of vehicle one?', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.anti_theft_installed.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value'}
+    list_type_mapping = {
+        "vehicle_details":vehicle_list,
+        "co_insured":co_insured_list,
+        "driver_details":driver_list,
+    }
+    
     cur = data
     for t in list_path:
         cur = cur[t]
     lst = cur  # this is the list itself
-    template = lst[0] if lst else None
+    template = lst[0] if lst else list_type_mapping[list_path[2]]
     if new_count < 1:
         lst.clear()
         return
@@ -1379,62 +1403,66 @@ def resize_list_with_ordinal(data: dict, list_path: List[Union[str,int]], new_co
         del lst[new_count:]
 
 def normalize_questionnaire(q_repo: dict) -> dict:
-    """
-    1) Finds any description ending in an English ordinal word
-       (one, two, three, …) and replaces that with the ordinal
-       matching its JSON-path index + 1.
-    2) Updates number_of_drivers, number_of_co_insured, number_of_vehicles
-       to match list lengths (if they were not originally None).
-    """
-    # helper: replace trailing ordinal with the correct one
-    def fix_description(desc: str, correct_idx: int) -> str:
-        # regex: last word if it's an ordinal
-        return re.sub(
-            r"\b(" + "|".join(ORDINALS.values()) + r")\b$",
-            ORDINALS.get(correct_idx, r"\1"),
-            desc,
-            flags=re.IGNORECASE
-        )
+    try:
+      """
+      1) Finds any description ending in an English ordinal word
+        (one, two, three, …) and replaces that with the ordinal
+        matching its JSON-path index + 1.
+      2) Updates number_of_drivers, number_of_co_insured, number_of_vehicles
+        to match list lengths (if they were not originally None).
+      """
+      # helper: replace trailing ordinal with the correct one
+      def fix_description(desc: str, correct_idx: int) -> str:
+          # regex: last word if it's an ordinal
+          return re.sub(
+              r"\b(" + "|".join(ORDINALS.values()) + r")\b$",
+              ORDINALS.get(correct_idx, r"\1"),
+              desc,
+              flags=re.IGNORECASE
+          )
 
-    def _recurse_and_fix(node, correct_idx: int):
-        if isinstance(node, dict):
-            for k, v in node.items():
-                if k == "description" and isinstance(v, str):
-                    node[k] = fix_description(v, correct_idx)
-                else:
-                    _recurse_and_fix(v, correct_idx)
-        elif isinstance(node, list):
-            for elt in node:
-                _recurse_and_fix(elt, correct_idx)
+      def _recurse_and_fix(node, correct_idx: int):
+          if isinstance(node, dict):
+              for k, v in node.items():
+                  if k == "description" and isinstance(v, str):
+                      node[k] = fix_description(v, correct_idx)
+                  else:
+                      _recurse_and_fix(v, correct_idx)
+          elif isinstance(node, list):
+              for elt in node:
+                  _recurse_and_fix(elt, correct_idx)
 
-    # the three lists we care about
-    groups = ["driver_details", "co_insured", "vehicle_details"]
+      # the three lists we care about
+      groups = ["driver_details", "co_insured", "vehicle_details"]
 
-    for field in groups:
-        items = q_repo["value"].get(field, {}).get("value") or []
-        for elem in items:
-            # pull the first [n] we find in its json_path
-            jp = elem.get("json_path", "")
-            m = re.search(r"\[(\d+)\]", jp)
-            if not m:
-                continue
-            zero_idx = int(m.group(1))
-            one_idx = zero_idx + 1
-            # walk that element and fix any description
-            _recurse_and_fix(elem, one_idx)
+      for field in groups:
+          items = q_repo["value"].get(field, {}).get("value") or []
+          for elem in items:
+              # pull the first [n] we find in its json_path
+              jp = elem.get("json_path", "")
+              m = re.search(r"\[(\d+)\]", jp)
+              if not m:
+                  continue
+              zero_idx = int(m.group(1))
+              one_idx = zero_idx + 1
+              # walk that element and fix any description
+              _recurse_and_fix(elem, one_idx)
 
-    # now update the counts
-    count_fields = {
-        "number_of_drivers":    len(q_repo["value"].get("driver_details", {}).get("value", [])),
-        "number_of_co_insured": len(q_repo["value"].get("co_insured",    {}).get("value", [])),
-        "number_of_vehicles":   len(q_repo["value"].get("vehicle_details", {}).get("value", []))
-    }
-    for cf, new_val in count_fields.items():
-        node = q_repo["value"].get(cf)
-        if node and node.get("value") is not None:
-            node["value"] = new_val
+      # now update the counts
+      count_fields = {
+          "number_of_drivers":    len(q_repo["value"].get("driver_details", {}).get("value", [])),
+          "number_of_co_insured": len(q_repo["value"].get("co_insured",    {}).get("value", [])),
+          "number_of_vehicles":   len(q_repo["value"].get("vehicle_details", {}).get("value", []))
+      }
+      for cf, new_val in count_fields.items():
+          node = q_repo["value"].get(cf)
+          if node and node.get("value") is not None:
+              node["value"] = new_val
 
-    return
+      return
+    except Exception as e:
+        print(f"Error in normalize_questionnaire: {e}")
+        return 
 
 def fill_form_temp(json_path: str, json_data: dict) -> None:
     """Fill form with temporary data from top until reaching specified json_path"""
@@ -1878,7 +1906,7 @@ def get_today_date():
   """Returns today's date in dd-mm-yyyy format"""
   return str(datetime.now().strftime("%d-%m-%Y"))
 
-def validate_date(language_processor_response):
+def validate_date(language_processor_response,data):
     if language_processor_response.get("command_type") == "update":
         for field, value in language_processor_response.get("fields").items():
           if 'date' in field.lower():
@@ -1888,17 +1916,39 @@ def validate_date(language_processor_response):
                       today_date = datetime.strptime(get_today_date(), "%d-%m-%Y")
                       if value_date < today_date:
                           return {"command_type":"reply_to_user","message":"Can you please provide date again? Effective date cannot be in past"}
-                  except ValueError:
+                  except Exception as e:
+                      log_to_file(f"error in validate_date: {str(e)}")
                       return {"command_type":"reply_to_user","message":"Please provide date again."}
-              else:
+              elif 'date of birth' in field.lower():
                   try:
                       value_date = datetime.strptime(value, "%d-%m-%Y") 
                       today_date = datetime.strptime(get_today_date(), "%d-%m-%Y")
                       if value_date > today_date:
                           return {"command_type":"reply_to_user","message":"Can you please provide date again? Date of birth cannot be in the future"}
-                  except ValueError:
+                  except Exception as e:
+                      log_to_file(f"error in validate_date: {str(e)}")
                       return {"command_type":"reply_to_user","message":"Please provide date again."}
-                  
+          elif 'years at the current' in field.lower():
+              try:
+                  form_data = data.data
+                  log_to_file(f"form_data: {form_data}")
+                  birth_date = form_data['lead_repo']['value']['date_of_birth']['value']
+                  birth_date = datetime.strptime(birth_date, "%d-%m-%Y")
+                  today_date = datetime.strptime(get_today_date(), "%d-%m-%Y")
+                  age = today_date.year - birth_date.year - ((today_date.month, today_date.day) < (birth_date.month, birth_date.day))
+
+                  if int(value) > age:
+                      return {"command_type":"reply_to_user","message":"Can you please years at current address? It should be less than or equal to your age"}
+              except Exception as e:
+                  log_to_file(f"error in validate_date: {str(e)}")
+                  return {"command_type":"reply_to_user","message":"Please provide Years at current address again."}
+          elif 'age when' in field.lower() and 'licensed' in field.lower():
+              try:
+                  if int(value) < 15:
+                      return {"command_type":"reply_to_user","message":"Can you please provide age again? Age when licensed cannot be less than 15"}
+              except Exception as e:
+                  log_to_file(f"error in validate_date: {str(e)}")
+                  return {"command_type":"reply_to_user","message":"Please provide Age when licensed again."}
 
     return language_processor_response
 
@@ -2029,7 +2079,6 @@ async def json_agent(data,message):
   catagory 2 : delete
   catagory 3 : find
   catagory 4 : message
-
   Your Responsibilities:  
 
     0. if command catagory is find then use get_field to get details of fields provided and return the fields details in reply_message.
@@ -2074,6 +2123,7 @@ async def json_agent(data,message):
 
     strictly do not update any field if its path is unknown or missing get it using get_field.
     strictly do not store data in memory—only persist it using update_field and get_field.
+
 
   response should be in this json format:
   {{
@@ -2200,13 +2250,7 @@ async def validation_agent(data):
   data.output_tokens += int(completion_tokens)
   data.cached_tokens += int(cached_tokens)
   
-  costs = calculate_costs(actual_input_tokens, cached_tokens, completion_tokens)
-  print(f"Input Tokens: {actual_input_tokens} - Cost: ${costs['input_cost']:.6f}")
-  print(f"Cached Tokens: {cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
-  print(f"Output Tokens: {completion_tokens} - Cost: ${costs['output_cost']:.6f}")
-  print(f"Total Cost: ${costs['total_cost']:.6f}")
-  
-  
+   
   response = json.loads(response["choices"][0]["message"]["content"])
   log_to_file(f"validation_agent response: {response}")
   return response
@@ -2326,7 +2370,7 @@ async def reply_agent(data,message):
 
 async def chat_pipeline(data,message):
   processed_message = await language_processor(data,message)
-  processed_message = validate_date(processed_message)
+  processed_message = validate_date(processed_message,data)
   if processed_message['command_type'] == 'reply_to_user':
     return processed_message['message']
   message = processed_message

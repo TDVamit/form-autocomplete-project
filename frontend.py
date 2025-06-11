@@ -1311,7 +1311,7 @@ def process_step_by_step():
             asyncio.set_event_loop(loop)
             processed_message = loop.run_until_complete(language_processor(st.session_state.session_data, st.session_state.current_user_message))
             loop.close()
-            processed_message = validate_date(processed_message)
+            processed_message = validate_date(processed_message,st.session_state.session_data)
             if processed_message['command_type'] == 'reply_to_user':
                 st.session_state.chat_history.append({
                     "role": "assistant", 
@@ -1371,8 +1371,7 @@ def process_step_by_step():
                         st.session_state.processing_message = f"🔧 Fixing validation issues... (retries left: {st.session_state.validation_tries})"
                         # Update the message to follow the commands and retry
                         st.session_state.processed_data = {
-                            "command_type": "update",
-                            "fields": {"_validation_commands": validation_response["commands"]}
+                            {"update": validation_response["commands"]}
                         }
                         st.session_state.processing_step = 3  # Go back to JSON agent step
                         st.rerun()
