@@ -12,6 +12,7 @@ import asyncio
 import hashlib
 from datetime import datetime
 import asyncio
+import copy
 
 
 
@@ -257,79 +258,7 @@ form = {
             "is_required": False,
             "value": None
           },
-          "license_status": {
-            "type": "enum",
-            "description": "License status of insured",
-            "is_required": False,
-            "value": None,
-            "enum": ["Valid", "Suspended", "Expired"]
-          },
-          "licensed_state": {
-            "type": "string",
-            "description": "State where the insured is licensed",
-            "is_required": False,
-            "value": None
-          },
-          "license_number": {
-            "type": "string",
-            "description": "Insured's license number (min. 8 chars)",
-            "is_required": False,
-            "value": None
-          },
-          "licensed_age": {
-            "type": "integer",
-            "description": "Age when the insured was licensed",
-            "is_required": False,
-            "value": None
-          },
-          "rated": {
-            "type": "boolean",
-            "description": "Whether the insured is rated",
-            "is_required": False,
-            "value": None
-          },
-          "sr22_required": {
-            "type": "boolean",
-            "description": "Whether an SR‑22 is required of insured",
-            "is_required": False,
-            "value": None
-          },
-          "drive_for_rideshare": {
-            "type": "boolean",
-            "description": "Whether the insured uses rideshare services",
-            "is_required": False,
-            "value": None
-          },
-          "drive_for_delivery": {
-            "type": "boolean",
-            "description": "Whether the insured uses delivery services",
-            "is_required": False,
-            "value": None
-          },
-          "driver_discounts": {
-            "type": "string",
-            "description": "Any discounts applicable to the insured",
-            "is_required": False,
-            "value": None
-          },
-          "good_student_discount": {
-            "type": "boolean",
-            "description": "Good student discount eligibility to insured",
-            "is_required": False,
-            "value": None
-          },
-          "mature_driver_discount": {
-            "type": "boolean",
-            "description": "Mature driver discount eligibility to insured",
-            "is_required": False,
-            "value": None
-          },
-          "safe_driver_discount": {
-            "type": "boolean",
-            "description": "Safe driver discount eligibility to insured",
-            "is_required": False,
-            "value": None
-          }
+          
         }
       }
     }
@@ -339,6 +268,79 @@ form = {
     "description": "Questionnaire repository metadata",
     "is_required": False,
     "value": {
+      "license_status": {
+          "type": "enum",
+          "description": "License status of insured",
+          "is_required": False,
+          "value": None,
+          "enum": ["Valid", "Suspended", "Expired"]
+        },
+        "licensed_state": {
+          "type": "string",
+          "description": "State where the insured is licensed",
+          "is_required": False,
+          "value": None
+        },
+        "license_number": {
+          "type": "string",
+          "description": "Insured's license number (min. 8 chars)",
+          "is_required": False,
+          "value": None
+        },
+        "licensed_age": {
+          "type": "integer",
+          "description": "Age when the insured was licensed",
+          "is_required": False,
+          "value": None
+        },
+        "rated": {
+          "type": "boolean",
+          "description": "Whether the insured is rated",
+          "is_required": False,
+          "value": None
+        },
+        "sr22_required": {
+          "type": "boolean",
+          "description": "Whether an SR‑22 is required of insured",
+          "is_required": False,
+          "value": None
+        },
+        "drive_for_rideshare": {
+          "type": "boolean",
+          "description": "Whether the insured uses rideshare services",
+          "is_required": False,
+          "value": None
+        },
+        "drive_for_delivery": {
+          "type": "boolean",
+          "description": "Whether the insured uses delivery services",
+          "is_required": False,
+          "value": None
+        },
+        "driver_discounts": {
+          "type": "string",
+          "description": "Any discounts applicable to the insured",
+          "is_required": False,
+          "value": None
+        },
+        "good_student_discount": {
+          "type": "boolean",
+          "description": "Good student discount eligibility to insured",
+          "is_required": False,
+          "value": None
+        },
+        "mature_driver_discount": {
+          "type": "boolean",
+          "description": "Mature driver discount eligibility to insured",
+          "is_required": False,
+          "value": None
+        },
+        "safe_driver_discount": {
+          "type": "boolean",
+          "description": "Safe driver discount eligibility to insured",
+          "is_required": False,
+          "value": None
+        },
       "number_of_co_insured":{
         "type":"integer",
         "description":"Total number of co-insured individuals",
@@ -977,6 +979,328 @@ form = {
   }
 }
 
+vehicle_details = [
+        {
+            "vin": None,
+            "make": None,
+            "model": None,
+            "year": None,
+            "assigned_driver": None,
+            "garaged_state": None,
+            "garaging_address": {
+                "street_address": None,
+                "city": None,
+                "state": None,
+                "zip_code": None
+            },
+            "annual_miles": None,
+            "vehicle_usage": None,
+            "financed_vehicle": None,
+            "coverage_details": {
+                "comprehensive_deductible": None,
+                "collision_deductible": None,
+                "towing_coverage": {
+                    "coverage_limit": None
+                },
+                "rental_reimbursement": {
+                    "daily_limit": None,
+                    "total_limit": None
+                },
+                "full_glass_coverage": None
+            },
+            "rented_on_turo": None,
+            "ownership_type": None,
+            "anti_theft_installed": None
+        }
+    ]
+
+driver_details = [
+        {
+            "name": {
+                "first_name": None,
+                "middle_name": None,
+                "last_name": None
+            },
+            "date_of_birth": None,
+            "gender": None,
+            "relationship": None,
+            "marital_status": None,
+            "occupation": None,
+            "education": None,
+            "license_status": None,
+            "licensed_state": None,
+            "license_number": None,
+            "licensed_age": None,
+            "rated": None,
+            "sr22_required": None,
+            "drive_for_rideshare": None,
+            "drive_for_delivery": None,
+            "driver_discounts": None,
+            "good_student_discount": None,
+            "mature_driver_discount": None,
+            "safe_driver_discount": None
+        }
+    ]
+
+co_insured = [
+        {
+            "name": {
+                "first_name": None,
+                "middle_name": None,
+                "last_name": None
+            },
+            "date_of_birth": None,
+            "gender": None,
+            "relationship": None,
+            "marital_status": None,
+            "occupation": None,
+            "education": None,
+            "license_status": None,
+            "licensed_state": None,
+            "license_number": None,
+            "licensed_age": None,
+            "rated": None,
+            "sr22_required": None,
+            "drive_for_rideshare": None,
+            "drive_for_delivery": None,
+            "driver_discounts": None,
+            "good_student_discount": None,
+            "mature_driver_discount": None,
+            "safe_driver_discount": None
+        }
+    ]
+
+field_mapping = {
+    "lead_repo.value.insured.value.first_name.value":      "lead_repo.insured.first_name",
+    "lead_repo.value.insured.value.middle_name.value":     "lead_repo.insured.middle_name",
+    "lead_repo.value.insured.value.last_name.value":       "lead_repo.insured.last_name",
+    "lead_repo.value.date_of_birth.value":                 "lead_repo.date_of_birth.$date",
+    "lead_repo.value.gender.value":                        "lead_repo.gender",
+    "lead_repo.value.marital_status.value":                "lead_repo.marital_status",
+    "lead_repo.value.email.value":                         "lead_repo.email",
+    "lead_repo.value.social_security_number.value":        "lead_repo.social_security_number",
+    "lead_repo.value.occupation.value":                    "lead_repo.occupation",
+    "lead_repo.value.education.value":                     "lead_repo.education",
+    "lead_repo.value.phone_number.value.country_code.value":"lead_repo.phone_number.country_code",
+    "lead_repo.value.phone_number.value.number.value":     "lead_repo.phone_number.number",
+    "lead_repo.value.can_text.value":                      "lead_repo.can_text",
+    "lead_repo.value.contact_preference.value":            "lead_repo.contact_preference",
+    "lead_repo.value.address_detail.value.insured_address.value.street_address.value":"lead_repo.address_detail.insured_address.street_address",
+    "lead_repo.value.address_detail.value.insured_address.value.city.value": "lead_repo.address_detail.insured_address.city",
+    "lead_repo.value.address_detail.value.insured_address.value.state.value":
+                                                           "lead_repo.address_detail.insured_address.state",
+    "lead_repo.value.address_detail.value.insured_address.value.zip_code.value":
+                                                           "lead_repo.address_detail.insured_address.zip_code",
+    "lead_repo.value.address_detail.value.mailing_address.value.street_address.value":
+                                                           "lead_repo.address_detail.mailing_address.street_address",
+    "lead_repo.value.address_detail.value.mailing_address.value.city.value":
+                                                           "lead_repo.address_detail.mailing_address.city",
+    "lead_repo.value.address_detail.value.mailing_address.value.state.value":
+                                                           "lead_repo.address_detail.mailing_address.state",
+    "lead_repo.value.address_detail.value.mailing_address.value.zip_code.value":
+                                                           "lead_repo.address_detail.mailing_address.zip_code",
+    "lead_repo.value.address_detail.value.years_at_address.value":
+                                                           "lead_repo.address_detail.years_at_address",
+    "lead_repo.value.address_detail.value.county.value":    "lead_repo.address_detail.county",
+    "questionaire_repo.value.license_status.value":                       "questionaire_repo.license_status",
+    "questionaire_repo.value.licensed_state.value":                       "questionaire_repo.licensed_state",
+    "questionaire_repo.value.license_number.value":                      "questionaire_repo.license_number",
+    "questionaire_repo.value.licensed_age.value":                        "questionaire_repo.licensed_age",
+    "questionaire_repo.value.rated.value":                               "questionaire_repo.rated",
+    "questionaire_repo.value.sr22_required.value":                      "questionaire_repo.sr22_required",
+    "questionaire_repo.value.drive_for_rideshare.value":                "questionaire_repo.drive_for_rideshare",
+    "questionaire_repo.value.drive_for_delivery.value":                 "questionaire_repo.drive_for_delivery",
+    "questionaire_repo.value.driver_discounts.value":                   "questionaire_repo.driver_discounts",
+    "questionaire_repo.value.good_student_discount.value":              "questionaire_repo.good_student_discount",
+    "questionaire_repo.value.mature_driver_discount.value":             "questionaire_repo.mature_driver_discount",
+    "questionaire_repo.value.safe_driver_discount.value":               "questionaire_repo.safe_driver_discount",
+    "questionaire_repo.value.number_of_co_insured.value":               "questionaire_repo.number_of_co_insured",
+    "questionaire_repo.value.additional_co_insured.value":              "questionaire_repo.additional_co_insured",
+    "questionaire_repo.value.policy_details.value.effective_date.value":"questionaire_repo.policy_details.effective_date",
+    "questionaire_repo.value.policy_details.value.current_carrier.value":"questionaire_repo.policy_details.current_carrier",
+    "questionaire_repo.value.policy_details.value.current_carrier_premium.value":
+                                                                        "questionaire_repo.policy_details.current_carrier_premium",
+    "questionaire_repo.value.policy_details.value.years_with_prior_carrier.value":
+                                                                        "questionaire_repo.policy_details.years_with_prior_carrier",
+    "questionaire_repo.value.policy_details.value.years_continuous_coverage.value":
+                                                                        "questionaire_repo.policy_details.years_continuous_coverage",
+    "questionaire_repo.value.policy_details.value.prior_insurance_liability_limit.value":
+                                                                        "questionaire_repo.policy_details.prior_insurance_liability_limit",
+    "questionaire_repo.value.policy_details.value.policy_term_length.value":
+                                                                        "questionaire_repo.policy_details.policy_term_length",
+    "questionaire_repo.value.policy_details.value.payment_frequency.value":
+                                                                        "questionaire_repo.policy_details.payment_frequency",
+    "questionaire_repo.value.coverage_details.value.bodily_injury.value":
+                                                                        "questionaire_repo.coverage_details.bodily_injury",
+    "questionaire_repo.value.coverage_details.value.property_damage.value":
+                                                                        "questionaire_repo.coverage_details.property_damage",
+    "questionaire_repo.value.coverage_details.value.personal_injury_protection.value":
+                                                                        "questionaire_repo.coverage_details.personal_injury_protection",
+    "questionaire_repo.value.coverage_details.value.uninsured_motorist.value":
+                                                                        "questionaire_repo.coverage_details.uninsured_motorist",
+    "questionaire_repo.value.coverage_details.value.uninsured_motorist_pd.value":
+                                                                        "questionaire_repo.coverage_details.uninsured_motorist_pd",
+    "questionaire_repo.value.coverage_details.value.underinsured_motorist.value":
+                                                                        "questionaire_repo.coverage_details.underinsured_motorist",
+    "questionaire_repo.value.coverage_details.value.medical_payments.value":
+                                                                        "questionaire_repo.coverage_details.medical_payments",
+    "questionaire_repo.value.number_of_drivers.value":                   "questionaire_repo.number_of_drivers",
+    "questionaire_repo.value.additional_drivers.value":                  "questionaire_repo.additional_drivers",
+    "questionaire_repo.value.number_of_vehicles.value":                  "questionaire_repo.number_of_vehicles",
+    "questionaire_repo.value.additional_vehicles.value":                 "questionaire_repo.additional_vehicles",    
+}
+
+field_mapping_lists = {
+    "questionaire_repo.value.co_insured.value":                         "questionaire_repo.co_insured",
+    "questionaire_repo.value.vehicle_details.value":                     "questionaire_repo.vehicle_details",
+    "questionaire_repo.value.driver_details.value":                      "questionaire_repo.driver_details",
+}
+
+# 1. co_insured subfield mapping
+co_insured_field_map = {
+    "value.name.value.first_name.value":    "name.first_name",
+    "value.name.value.middle_name.value":   "name.middle_name",
+    "value.name.value.last_name.value":     "name.last_name",
+    "value.date_of_birth.value":            "date_of_birth",
+    "value.gender.value":                   "gender",
+    "value.relationship.value":             "relationship",
+    "value.marital_status.value":           "marital_status",
+    "value.occupation.value":               "occupation",
+    "value.education.value":                "education",
+    "value.license_status.value":           "license_status",
+    "value.licensed_state.value":           "licensed_state",
+    "value.license_number.value":           "license_number",
+    "value.licensed_age.value":             "licensed_age",
+    "value.rated.value":                    "rated",
+    "value.sr22_required.value":            "sr22_required",
+    "value.drive_for_rideshare.value":      "drive_for_rideshare",
+    "value.drive_for_delivery.value":       "drive_for_delivery",
+    "value.driver_discounts.value":         "driver_discounts",
+    "value.good_student_discount.value":    "good_student_discount",
+    "value.mature_driver_discount.value":   "mature_driver_discount",
+    "value.safe_driver_discount.value":     "safe_driver_discount",
+}
+
+# 2. driver_details subfield mapping
+driver_details_field_map = {
+    "value.name.value.first_name.value":    "name.first_name",
+    "value.name.value.middle_name.value":   "name.middle_name",
+    "value.name.value.last_name.value":     "name.last_name",
+    "value.date_of_birth.value":            "date_of_birth",
+    "value.gender.value":                   "gender",
+    "value.relationship.value":             "relationship",
+    "value.marital_status.value":           "marital_status",
+    "value.occupation.value":               "occupation",
+    "value.education.value":                "education",
+    "value.license_status.value":           "license_status",
+    "value.licensed_state.value":           "licensed_state",
+    "value.license_number.value":           "license_number",
+    "value.licensed_age.value":             "licensed_age",
+    "value.rated.value":                    "rated",
+    "value.sr22_required.value":            "sr22_required",
+    "value.drive_for_rideshare.value":      "drive_for_rideshare",
+    "value.drive_for_delivery.value":       "drive_for_delivery",
+    "value.driver_discounts.value":         "driver_discounts",
+    "value.good_student_discount.value":    "good_student_discount",
+    "value.mature_driver_discount.value":   "mature_driver_discount",
+    "value.safe_driver_discount.value":     "safe_driver_discount",
+}
+
+# 3. vehicle_details subfield mapping
+vehicle_details_field_map = {
+    "value.vin.value":                                                       "vin",
+    "value.make.value":                                                      "make",
+    "value.model.value":                                                     "model",
+    "value.year.value":                                                      "year",
+    "value.assigned_driver.value":                                           "assigned_driver",
+    "value.garaged_state.value":                                             "garaged_state",
+    "value.garaging_address.value.street_address.value":                     "garaging_address.street_address",
+    "value.garaging_address.value.city.value":                               "garaging_address.city",
+    "value.garaging_address.value.state.value":                              "garaging_address.state",
+    "value.garaging_address.value.zip_code.value":                           "garaging_address.zip_code",
+    "value.annual_miles.value":                                              "annual_miles",
+    "value.vehicle_usage.value":                                             "vehicle_usage",
+    "value.financed_vehicle.value":                                          "financed_vehicle",
+    "value.coverage_details.value.comprehensive_deductible.value":           "coverage_details.comprehensive_deductible",
+    "value.coverage_details.value.collision_deductible.value":               "coverage_details.collision_deductible",
+    "value.coverage_details.value.towing_coverage.value.coverage_limit.value":"coverage_details.towing_coverage.coverage_limit",
+    "value.coverage_details.value.rental_reimbursement.value.daily_limit.value":"coverage_details.rental_reimbursement.daily_limit",
+    "value.coverage_details.value.rental_reimbursement.value.total_limit.value":"coverage_details.rental_reimbursement.total_limit",
+    "value.coverage_details.value.full_glass_coverage.value":               "coverage_details.full_glass_coverage",
+    "value.rented_on_turo.value":                                            "rented_on_turo",
+    "value.ownership_type.value":                                            "ownership_type",
+    "value.anti_theft_installed.value":                                      "anti_theft_installed",
+}
+
+def sync_lists(form: dict,db_data: dict,mapping:dict,get_form:bool=True) -> dict:
+    data_mapping_lists = {
+      "questionaire_repo.value.co_insured.value": co_insured_field_map,
+      "questionaire_repo.value.vehicle_details.value": vehicle_details_field_map,
+      "questionaire_repo.value.driver_details.value": driver_details_field_map,
+      }
+    copy_list_mapping_lists = {
+      "questionaire_repo.value.co_insured.value": co_insured,
+      "questionaire_repo.value.vehicle_details.value": vehicle_details,
+      "questionaire_repo.value.driver_details.value": driver_details,
+      }
+    for form_path, db_path in mapping.items():
+        form_tokens = _parse_tokens(form_path)
+        db_tokens = _parse_tokens(db_path)
+        cur_form = form
+        cur_db = db_data
+        for i, token in enumerate(form_tokens[:-1]):
+            cur_form = cur_form[token]
+        form_final = form_tokens[-1]
+        for i, token in enumerate(db_tokens[:-1]):
+            cur_db = cur_db[token]
+        db_final = db_tokens[-1]
+        if get_form:
+            list_length = len(cur_db[db_final])
+            resize_list_with_ordinal(
+                form,
+                form_tokens,
+                list_length
+            )
+        else:
+            list_length = len(cur_form[form_final])
+            copy_list = []
+            for i in range(list_length):
+                copy_list.extend(copy_list_mapping_lists[form_path])
+            cur_db[db_final] = copy_list
+
+        for i in range(list_length):
+            db_form_conversion(cur_form[form_final][i], cur_db[db_final][i], data_mapping_lists[form_path], get_form,called_from_sync=True)
+
+    if get_form:
+        return form
+    else:
+        return db_data
+
+
+
+def db_form_conversion(form: dict, db_data: dict,mapping:dict, get_form:bool=True,called_from_sync:bool=False) -> dict:
+    output = {}
+    for form_path, db_path in mapping.items():
+      form_tokens = _parse_tokens(form_path)
+      db_tokens = _parse_tokens(db_path)
+      cur_form = form
+      cur_db = db_data
+      for i, token in enumerate(form_tokens[:-1]):
+          cur_form = cur_form[token]
+      form_final = form_tokens[-1]
+      for i, token in enumerate(db_tokens[:-1]):
+          cur_db = cur_db[token]        
+      db_final = db_tokens[-1]
+      if get_form:
+        cur_form[form_final] = cur_db[db_final]
+        output = form
+      else:
+        cur_db[db_final] = cur_form[form_final]
+        output = db_data
+    if not called_from_sync:
+        sync_lists(form,db_data,field_mapping_lists,get_form=get_form)
+    return output
+
 def isComplete(field_object):
     try:
       field_type = field_object.get('type')
@@ -1260,6 +1584,8 @@ class Form:
     data: dict
     history: list
     language_processor_response: list
+    lead_repo: dict
+    questionaire_repo: dict
     input_tokens: int
     output_tokens: int
     cached_tokens: int
@@ -1291,7 +1617,7 @@ COMMON_SYNC_FIELDS = {
 
 def _parse_tokens(path: str) -> List[Union[str, int]]:
     tokens = []
-    for token in re.findall(r"\w+|\[\d+\]", path):
+    for token in re.findall(r"[\w$]+|\[\d+\]", path):
         if token.startswith('['):
             tokens.append(int(token[1:-1]))
         else:
@@ -1799,6 +2125,7 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
 
     finally:
       try:
+        print(db_form_conversion(form.context.data,{"lead_repo":form.context.lead_repo,"questionaire_repo":form.context.questionaire_repo},field_mapping,get_form=False))
         normalise(form.context.data)
         normalize_questionnaire(form.context.data["questionaire_repo"])
         log_to_file(f"json file:{form.context.data}")
@@ -1811,14 +2138,9 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
         log_to_file(f"error in updating fields: {path} {str(e)}")
         return False
 
-
-normalise(form)
-data = Form(data=form, history=[],language_processor_response=[],input_tokens=0,output_tokens=0,cached_tokens=0)
-
-# Token pricing constants (per 1M tokens)
-INPUT_TOKEN_PRICE = 0.40  # $0.40 / 1M tokens
-CACHED_TOKEN_PRICE = 0.10  # $0.10 / 1M tokens  
-OUTPUT_TOKEN_PRICE = 1.60  # $1.60 / 1M tokens
+INPUT_TOKEN_PRICE = 0.40  
+CACHED_TOKEN_PRICE = 0.10  
+OUTPUT_TOKEN_PRICE = 1.60  
 
 def calculate_costs(input_tokens, cached_tokens, output_tokens):
     """Calculate costs for different token types"""
@@ -1835,13 +2157,13 @@ def calculate_costs(input_tokens, cached_tokens, output_tokens):
     }
 
 @function_tool(strict_mode=False)
-async def get_field(field_description : str):
+async def get_field(form: RunContextWrapper[Form],field_description : str):
   print("get_field called with field_description: ",field_description)
   """this fucntion returns fields based in given description"""
-  ctx= next_field(data.data)
+  ctx= next_field(form.context.data)
   log_to_file(f"field_description: {field_description}")
   try:
-    desc_path_mapping = extract_description_to_path(data.data)
+    desc_path_mapping = extract_description_to_path(form.context.data)
     client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     prompt = f"""
@@ -1881,22 +2203,16 @@ async def get_field(field_description : str):
     # Calculate actual input tokens (total input - cached)
     actual_input_tokens = prompt_tokens - cached_tokens
     
-    data.input_tokens += int(actual_input_tokens)
-    data.output_tokens += int(completion_tokens)
-    data.cached_tokens += int(cached_tokens)
-    
-    costs = calculate_costs(actual_input_tokens, cached_tokens, completion_tokens)
-    print(f"Input Tokens: {actual_input_tokens} - Cost: ${costs['input_cost']:.6f}")
-    print(f"Cached Tokens: {cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
-    print(f"Output Tokens: {completion_tokens} - Cost: ${costs['output_cost']:.6f}")
-    print(f"Total Cost: ${costs['total_cost']:.6f}")
-    
+    form.context.input_tokens += int(actual_input_tokens)
+    form.context.output_tokens += int(completion_tokens)
+    form.context.cached_tokens += int(cached_tokens)
+        
     response = json.loads(response["choices"][0]["message"]["content"])
     print("get_field response: ",response)
     if response["found"]:
-      print("get_field response: ",find_object_by_json_path(data.data,response["path"]))
-      log_to_file(f"get_field response: {find_object_by_json_path(data.data,response['path'])}")
-      return find_object_by_json_path(data.data,response["path"])
+      print("get_field response: ",find_object_by_json_path(form.context.data,response["path"]))
+      log_to_file(f"get_field response: {find_object_by_json_path(form.context.data,response['path'])}")
+      return find_object_by_json_path(form.context.data,response["path"])
     else :
       return None
   except Exception as e:
@@ -2390,19 +2706,134 @@ async def chat_pipeline(data,message):
   reply_agent_response = await reply_agent(data,json_agent_response)
   return reply_agent_response
 
+lead_repo = {
+    "_id": { "$oid": "684002e50d21f3a141d8a646" },
+    "account_type": "Personal",
+    "insurance_type": "Home",
+    "chat_ids": [],
+    "insured": {
+      "first_name": "John",
+      "middle_name": "A.",
+      "last_name": "Doe"
+    },
+    "date_of_birth": { "$date": "1985-04-15T00:00:00.000Z" },
+    "gender": "Male",
+    "marital_status": "Single",
+    "email": "yatinbadeja@gmail.com",
+    "phone_number": {
+      "country_code": "+1",
+      "number": "5551234567"
+    },
+    "can_text": True,
+    "contact_preference": "Phone",
+    "occupation": "Software Engineer",
+    "education": "High School",
+    "social_security_number": "123456789",
+    "address_detail": {
+      "insured_address": {
+        "street_address": "123 Main St",
+        "city": "Springfield",
+        "state": "IL",
+        "zip_code": "62704"
+      },
+      "mailing_address": {
+        "street_address": "456 Oak Ave",
+        "city": "Springfield",
+        "state": "IL",
+        "zip_code": "62705"
+      },
+      "years_at_address": 5,
+      "county": "Sangamon"
+    },
+    "send_questionnaire": False,
+    "producer": {
+      "$oid": "684001d40d21f3a141d8a641"
+    },
+    "customer_service_representative": None,
+    "created_at": {
+      "$date": "2025-06-04T08:25:09.598Z"
+    },
+    "updated_at": {
+      "$date": "2025-06-06T08:27:41.108Z"
+    },
+    "deactivated": False,
+    "status": "Contacted" 
+  }
+
+
+questionaire_repo = { 
+    "_id": { "$oid": "6842a6b194f4561d6a6d6cbe" },
+    "chat_id": None,
+    "lead_id": { "$oid": "6842a6b194f4561d6a6d6cbd" },
+    "license_status": None,
+    "licensed_state": None,
+    "license_number": None,
+    "licensed_age": None,
+    "rated": None,
+    "sr22_required": None,
+    "drive_for_rideshare": None,
+    "drive_for_delivery": None,
+    "driver_discounts": None,
+    "good_student_discount": None,
+    "mature_driver_discount": None,
+    "safe_driver_discount": None,
+    "number_of_co_insured": None,
+    "co_insured": [],
+    "additional_co_insured": None,
+    "policy_details": {
+      "effective_date": None,
+      "current_carrier": None,
+      "current_carrier_premium": None,
+      "years_with_prior_carrier": None,
+      "years_continuous_coverage": None,
+      "prior_insurance_liability_limit": None,
+      "policy_term_length": None,
+      "payment_frequency": None
+    },
+    "coverage_details": {
+      "bodily_injury": None,
+      "property_damage": None,
+      "personal_injury_protection": None,
+      "uninsured_motorist": None,
+      "uninsured_motorist_pd": None,
+      "underinsured_motorist": None,
+      "medical_payments": None
+    },
+    "number_of_drivers": None,
+    "driver_details": [],
+    "additional_drivers": None,
+    "number_of_vehicles": None,
+    "vehicle_details": [],
+    "additional_vehicles": None,
+    "claim_details": None,
+      "created_at": {
+        "$date": "2025-06-06T08:28:33.520Z"
+      },
+      "updated_at": {
+        "$date": "2025-06-06T08:28:33.520Z"
+      } 
+}
+
 
 async def main():
     print("Assistant:", "Hi! To get started with your insurance information, could you please provide Your Full Name.")
 
     while True:
+        normalise(form)
+        db_data = {
+          'lead_repo': lead_repo,
+          'questionaire_repo': questionaire_repo
+        }
+        updated_form = db_form_conversion(form, db_data, field_mapping, get_form=True)
+        updated_data = Form(data=updated_form,history=[],language_processor_response=[],lead_repo=lead_repo,questionaire_repo=questionaire_repo,input_tokens=0,output_tokens=0,cached_tokens=0)
         user_input = input("User: ")
-        response = await chat_pipeline(data, user_input)
-        costs = calculate_costs(data.input_tokens, data.cached_tokens, data.output_tokens)
-        total_tokens = data.input_tokens + data.cached_tokens + data.output_tokens
+        response = await chat_pipeline(updated_data, user_input)
+        costs = calculate_costs(updated_data.input_tokens, updated_data.cached_tokens, updated_data.output_tokens)
+        total_tokens = updated_data.input_tokens + updated_data.cached_tokens + updated_data.output_tokens
         
-        print(f"Input Tokens: {data.input_tokens} - Cost: ${costs['input_cost']:.6f}")
-        print(f"Cached Tokens: {data.cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
-        print(f"Output Tokens: {data.output_tokens} - Cost: ${costs['output_cost']:.6f}")
+        print(f"Input Tokens: {updated_data.input_tokens} - Cost: ${costs['input_cost']:.6f}")
+        print(f"Cached Tokens: {updated_data.cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
+        print(f"Output Tokens: {updated_data.output_tokens} - Cost: ${costs['output_cost']:.6f}")
         print(f"Total Tokens: {total_tokens} - Total Cost: ${costs['total_cost']:.6f}")
         print(response)
 
