@@ -70,30 +70,30 @@ nest_asyncio.apply()
 form = {
   "lead_repo": {
     "type": "object",
-    "description": "Lead repository metadata",
+    "description": "Lead repo",
     "is_required": True,
     "value": {
       "insured": {
         "type": "object",
-        "description": "Personal details of the insured",
+        "description": "Insured's details",
         "ask_collected":True,
         "is_required": True,
         "value": {
           "first_name": {
             "type": "string",
-            "description": "First name of the insured",
+            "description": "Insured first name",
             "is_required": True,
             "value": None
           },
           "middle_name": {
             "type": "string",
-            "description": "Middle name of the insured",
+            "description": "Insured middle name",
             "is_required": False,
             "value": None
           },
           "last_name": {
             "type": "string",
-            "description": "Last name of the insured",
+            "description": "Insured last name",
             "is_required": True,
             "value": None
           }
@@ -101,45 +101,45 @@ form = {
       },
       "date_of_birth": {
         "type": "date",
-        "description": "Date of birth of the insured",
+        "description": "Insured dob",
         "is_required": True,
         "value": None
       },
       "gender": {
         "type": "enum",
-        "description": "Gender of the insured",
+        "description": "Insured gender",
         "is_required": True,
         "value": None,
         "enum": ["Male", "Female", "Other"]
       },
       "marital_status": {
         "type": "enum",
-        "description": "Marital status of the insured",
+        "description": "Insured marital status",
         "is_required": False,
         "value": None,
         "enum": ["Single", "Married", "Divorced", "Widowed", "Domestic Partner"]
       },
       "email": {
         "type": "string",
-        "description": "Email address of the insured",
+        "description": "Insured email",
         "is_required": True,
         "value": None
       },
       "phone_number": {
         "type": "object",
-        "description": "Phone contact details",
+        "description": "Insured phone number",
         "ask_collected":True,
         "is_required": True,
         "value": {
           "country_code": {
             "type": "string",
-            "description": "Phone number country code (e.g., +1)",
+            "description": "country code",
             "is_required": True,
             "value": None
           },
           "number": {
             "type": "string",
-            "description": "Primary phone number of the insured",
+            "description": "phone number",
             "is_required": True,
             "value": None
           }
@@ -147,33 +147,33 @@ form = {
       },
       "can_text": {
         "type": "boolean",
-        "description": "Whether the insured can receive text messages",
+        "description": "Insured text-capable?", 
         "is_required": False,
         "value": None
       },
       "contact_preference": {
         "type": "enum",
-        "description": "Preferred contact method",
+        "description": "Contact method",
         "is_required": False,
         "value": None,
         "enum": ["Phone", "Email", "Text"]
       },
       "occupation": {
         "type": "string",
-        "description": "Occupation of the insured",
+        "description": "Insured occupation",
         "is_required": False,
         "value": None
       },
       "education": {
         "type": "enum",
-        "description": "Highest level of education completed",
+        "description": "Insured education",
         "is_required": False,
         "value": None,
         "enum": ["High School", "Some College", "Associates Degree", "Bachelors", "Masters", "PhD"]
       },
       "social_security_number": {
         "type": "string",
-        "description": "Social Security Number of the insured",
+        "description": "Insured SSN",
         "is_required": True,
         "value": None
       },
@@ -184,31 +184,31 @@ form = {
         "value": {
           "insured_address": {
             "type": "object",
-            "description": "Primary residence address",
+            "description": "Insured address",
             "ask_collected":True,
             "is_required": True,
             "value": {
               "street_address": {
                 "type": "string",
-                "description": "Primary street address",
+                "description": "insured street",
                 "is_required": True,
                 "value": None
               },
               "city": {
                 "type": "string",
-                "description": "City of residence",
+                "description": "insured city",
                 "is_required": True,
                 "value": None
               },
               "state": {
                 "type": "string",
-                "description": "State of residence",
+                "description": "insured state",
                 "is_required": True,
                 "value": None
               },
               "zip_code": {
                 "type": "string",
-                "description": "ZIP or postal code",
+                "description": "zip code",
                 "is_required": True,
                 "value": None
               }
@@ -216,13 +216,13 @@ form = {
           },
           "mailing_address": {
             "type": "object",
-            "description": "Mailing address (if different)",
+            "description": "Mailing address",
             "ask_collected":True,
             "is_required": False,
             "value": {
               "street_address": {
                 "type": "string",
-                "description": "Mailing street address",
+                "description": "Mailing street",
                 "is_required": False,
                 "value": None
               },
@@ -240,7 +240,7 @@ form = {
               },
               "zip_code": {
                 "type": "string",
-                "description": "Mailing ZIP or postal code",
+                "description": "Mailing ZIP code",
                 "is_required": False,
                 "value": None
               }
@@ -248,13 +248,13 @@ form = {
           },
           "years_at_address": {
             "type": "integer",
-            "description": "Number of years at the current address",
+            "description": "Years at address",
             "is_required": False,
             "value": None
           },
           "county": {
             "type": "string",
-            "description": "County of residence",
+            "description": "County",
             "is_required": False,
             "value": None
           },
@@ -265,119 +265,119 @@ form = {
   },
   "questionaire_repo": {
     "type": "object",
-    "description": "Questionnaire repository metadata",
+    "description": "Questionnaire repo",
     "is_required": False,
     "value": {
       "license_status": {
           "type": "enum",
-          "description": "License status of insured",
+          "description": "License status",
           "is_required": False,
           "value": None,
           "enum": ["Valid", "Suspended", "Expired"]
         },
         "licensed_state": {
           "type": "string",
-          "description": "State where the insured is licensed",
+          "description": "licensed State",
           "is_required": False,
           "value": None
         },
         "license_number": {
           "type": "string",
-          "description": "Insured's license number (min. 8 chars)",
+          "description": "licensed number",
           "is_required": False,
           "value": None
         },
         "licensed_age": {
           "type": "integer",
-          "description": "Age when the insured was licensed",
+          "description": "licensed age",
           "is_required": False,
           "value": None
         },
         "rated": {
           "type": "boolean",
-          "description": "Whether the insured is rated",
+          "description": "insured rated?",
           "is_required": False,
           "value": None
         },
         "sr22_required": {
           "type": "boolean",
-          "description": "Whether an SR‑22 is required of insured",
+          "description": "SR‑22 required?",
           "is_required": False,
           "value": None
         },
         "drive_for_rideshare": {
           "type": "boolean",
-          "description": "Whether the insured uses rideshare services",
+          "description": "uses rideshare?",
           "is_required": False,
           "value": None
         },
         "drive_for_delivery": {
           "type": "boolean",
-          "description": "Whether the insured uses delivery services",
+          "description": "uses delivery?",
           "is_required": False,
           "value": None
         },
         "driver_discounts": {
           "type": "string",
-          "description": "Any discounts applicable to the insured",
+          "description": "Any driver discounts?",
           "is_required": False,
           "value": None
         },
         "good_student_discount": {
           "type": "boolean",
-          "description": "Good student discount eligibility to insured",
+          "description": "Good student discount?",
           "is_required": False,
           "value": None
         },
         "mature_driver_discount": {
           "type": "boolean",
-          "description": "Mature driver discount eligibility to insured",
+          "description": "Mature driver discount?",
           "is_required": False,
           "value": None
         },
         "safe_driver_discount": {
           "type": "boolean",
-          "description": "Safe driver discount eligibility to insured",
+          "description": "Safe driver discount?",
           "is_required": False,
           "value": None
         },
       "number_of_co_insured":{
         "type":"integer",
-        "description":"Total number of co-insured individuals",
+        "description":"Co-insured count",
         "is_required":False,
         "value":None
         },
       "co_insured": {
         "type": "list",
-        "description": "List of co‑insured individuals",
+        "description": "Co-insured list",
         "is_required": False,
         "value": [
           {
             "type": "object",
-            "description": "Details for co‑insured one",
+            "description": "Co-insured one Details",
             "is_required": False,
             "value": {
               "name": {
                 "type": "object",
-                "description": "Co‑insured one's name",
+                "description": "Co‑insured one name",
                 "ask_collected":True,
                 "is_required": False,
                 "value": {
                   "first_name": {
                     "type": "string",
-                    "description": "First name of co‑insured one",
+                    "description": "co-insured one first name",
                     "is_required": False,
                     "value": None
                   },
                   "middle_name": {
                     "type": "string",
-                    "description": "Middle name of co‑insured one",
+                    "description": "co-insured one middle name",
                     "is_required": False,
                     "value": None
                   },
                   "last_name": {
                     "type": "string",
-                    "description": "Last name of co‑insured one",
+                    "description": "co-insured one last name",
                     "is_required": False,
                     "value": None
                   }
@@ -385,114 +385,114 @@ form = {
               },
               "date_of_birth": {
                 "type": "date",
-                "description": "Date of birth of co-insured one",
+                "description": "co-insured one dob",
                 "is_required": False,
                 "value": None
               },
               "gender": {
                 "type": "enum",
-                "description": "Gender of co-insured one",
+                "description": "co-insured one gender",
                 "is_required": False,
                 "value": None,
                 "enum": ["Male", "Female", "Other"]
               },
               "relationship": {
                 "type": "enum",
-                "description": "Relationship to the policyholder of co-insured one",
+                "description": "Co-insured one relation to insured",
                 "is_required": False,
                 "value": None,
                 "enum": ["Spouse", "Child", "Parent", "Other"]
               },
               "marital_status": {
                 "type": "enum",
-                "description": "Marital status of co-insured one",
+                "description": "co-insured one marital status",
                 "is_required": False,
                 "value": None,
                 "enum": ["Single", "Married", "Divorced", "Widowed", "Domestic Partner"]
               },
               "occupation": {
                 "type": "string",
-                "description": "Occupation of co-insured one",
+                "description": "co-insured one occupation",
                 "is_required": False,
                 "value": None
               },
               "education": {
                 "type": "enum",
-                "description": "Education level of co-insured one",
+                "description": "co-insured one education",
                 "is_required": False,
                 "value": None,
                 "enum": ["High School", "Some College", "Associates Degree", "Bachelors", "Masters", "PhD"]
               },
               "license_status": {
                 "type": "enum",
-                "description": "License status of co-insured one",
+                "description": "co-insured one license status",
                 "is_required": False,
                 "value": None,
                 "enum": ["Valid", "Suspended", "Expired"]
               },
               "licensed_state": {
                 "type": "string",
-                "description": "State where the co-insured one is licensed",
+                "description": "co-insured one licensed state",
                 "is_required": False,
                 "value": None
               },
               "license_number": {
                 "type": "string",
-                "description": "Co-insured one's license number (min. 8 chars)",
+                "description": "co-insured one license number",
                 "is_required": False,
                 "value": None
               },
               "licensed_age": {
                 "type": "integer",
-                "description": "Age when the co-insured one was licensed",
+                "description": "co-insured one licensed age",
                 "is_required": False,
                 "value": None
               },
               "rated": {
                 "type": "boolean",
-                "description": "Whether the co-insured one is rated",
+                "description": "co-insured one rated?",
                 "is_required": False,
                 "value": None
               },
               "sr22_required": {
                 "type": "boolean",
-                "description": "Whether an SR‑22 is required of co-insured one",
+                "description": "co-insured one SR‑22 required?",
                 "is_required": False,
                 "value": None
               },
               "drive_for_rideshare": {
                 "type": "boolean",
-                "description": "Whether the co-insured one uses rideshare services",
+                "description": "co-insured one uses rideshare?",
                 "is_required": False,
                 "value": None
               },
               "drive_for_delivery": {
                 "type": "boolean",
-                "description": "Whether the co-insured one uses delivery services",
+                "description": "co-insured one uses delivery?",
                 "is_required": False,
                 "value": None
               },
               "driver_discounts": {
                 "type": "string",
-                "description": "Any discounts applicable to the co-insured one",
+                "description": "co-insured one discounts",
                 "is_required": False,
                 "value": None
               },
               "good_student_discount": {
                 "type": "boolean",
-                "description": "Good student discount eligibility to co-insured one",
+                "description": "co-insured one good student discount?",
                 "is_required": False,
                 "value": None
               },
               "mature_driver_discount": {
                 "type": "boolean",
-                "description": "Mature driver discount eligibility to co-insured one",
+                "description": "co-insured one mature driver discount?",
                 "is_required": False,
                 "value": None
               },
               "safe_driver_discount": {
                 "type": "boolean",
-                "description": "Safe driver discount eligibility to co-insured one",
+                "description": "co-insured one safe driver discount?",
                 "is_required": False,
                 "value": None
               }
@@ -502,30 +502,30 @@ form = {
       },
       "additional_co_insured":{
         "type":"boolean",
-        "description":"Do not add more co-insured (ask user if they want to add more co-insured)",
+        "description":"Skip more co-insured?(ask user to add more?)",
         "is_required":False,
         "value":None
       },
       "policy_details": {
         "type": "object",
-        "description": "Details of the current and prior policy",
+        "description": "Current/prior policy details",
         "is_required": True,
         "value": {
           "effective_date": {
             "type": "string",
-            "description": "Effective date of the policy",
+            "description": "Policy start date",
             "is_required": True,
             "value": None
           },
           "current_carrier": {
             "type": "string",
-            "description": "Name of the current insurance carrier",
+            "description": "Current carrier name",
             "is_required": False,
             "value": None
           },
           "current_carrier_premium": {
             "type": "integer",
-            "description": "Premium amount from current carrier",
+            "description": "Current carrier premium",
             "is_required": True,
             "value": None
           },
@@ -537,27 +537,27 @@ form = {
           },
           "years_continuous_coverage": {
             "type": "integer",
-            "description": "Years of continuous coverage",
+            "description": "continuous coverage years",
             "is_required": False,
             "value": None
           },
           "prior_insurance_liability_limit": {
             "type": "enum",
-            "description": "Liability limit of the prior policy",
+            "description": "prior policy liability limit",
             "is_required": False,
             "value": None,
             "enum": ["25/50", "50/100", "100/300", "250/500", "300/500", "500/500"]
           },
           "policy_term_length": {
             "type": "enum",
-            "description": "Length of the policy term in months",
+            "description": "Previous policy duration",
             "is_required": False,
             "value": None,
             "enum": ["6 months", "12 months"]
           },
           "payment_frequency": {
             "type": "enum",
-            "description": "Premium payment frequency",
+            "description": "payment frequency",
             "is_required": False,
             "value": None,
             "enum": ["Monthly", "Annually"]
@@ -566,54 +566,54 @@ form = {
       },
       "coverage_details": {
         "type": "object",
-        "description": "Liability and protection limits",
+        "description": "Coverage limits",
         "is_required": False,
         "value": {
           "bodily_injury": {
             "type": "enum",
-            "description": "Bodily injury liability limit",
+            "description": "Bodily injury limit",
             "is_required": False,
             "value": None,
             "enum": ["25/50", "50/100", "100/300", "250/500", "300/500", "500/500"]
           },
           "property_damage": {
             "type": "enum",
-            "description": "Property damage liability limit",
+            "description": "Property damage limit",
             "is_required": False,
             "value": None,
             "enum": ["25000", "50000", "100000", "300000", "500000"]
           },
           "personal_injury_protection": {
             "type": "enum",
-            "description": "Personal injury protection limit",
+            "description": "PIP limit",
             "is_required": False,
             "value": None,
             "enum": ["2500", "5000", "10000"]
           },
           "uninsured_motorist": {
             "type": "enum",
-            "description": "Uninsured motorist bodily injury limit",
+            "description": "UMBI limit",
             "is_required": False,
             "value": None,
             "enum": ["25/50", "50/100", "100/300", "250/500", "300/500", "500500"]
           },
           "uninsured_motorist_pd": {
             "type": "enum",
-            "description": "Uninsured motorist property damage limit",
+            "description": "UMPD limit",
             "is_required": False,
             "value": None,
             "enum": ["10000", "25000", "50000"]
           },
           "underinsured_motorist": {
             "type": "enum",
-            "description": "Underinsured motorist bodily injury limit",
+            "description": "UIMBI limit",
             "is_required": False,
             "value": None,
             "enum": ["25/50", "50/100", "100/300", "250/500", "300/500", "500500"]
           },
           "medical_payments": {
             "type": "enum",
-            "description": "Medical payments limit",
+            "description": "MedPay limit",
             "is_required": False,
             "value": None,
             "enum": ["500", "1000", "2000", "5000", "10000"]
@@ -622,41 +622,41 @@ form = {
       },
       "number_of_drivers": {
         "type": "integer",
-        "description": "Number of Additional drivers to be insured",
+        "description": "Additional driver count",
         "is_required": False,
         "value": None
       },
       "driver_details": {
         "type": "list",
-        "description": "List of Additional driver profiles",
+        "description": "Additional driver list",
         "is_required": False,
         "value": [
           {
             "type": "object",
-            "description": "Details for driver one",
+            "description": "driver one details",
             "is_required": False,
             "value": {
               "name": {
                 "type": "object",
-                "description": "Driver one's name",
+                "description": "driver one name",
                 "ask_collected":True,
                 "is_required": False,
                 "value": {
                   "first_name": {
                     "type": "string",
-                    "description": "First name of driver one",
+                    "description": "driver one first name",
                     "is_required": False,
                     "value": None
                   },
                   "middle_name": {
                     "type": "string",
-                    "description": "Middle name of driver one",
+                    "description": "driver one middle name",
                     "is_required": False,
                     "value": None
                   },
                   "last_name": {
                     "type": "string",
-                    "description": "Last name of driver one",
+                    "description": "driver one last name",
                     "is_required": False,
                     "value": None
                   }
@@ -664,114 +664,114 @@ form = {
               },
               "date_of_birth": {
                 "type": "date",
-                "description": "Date of birth of driver one",
+                "description": "driver one dob",
                 "is_required": False,
                 "value": None
               },
               "gender": {
                 "type": "enum",
-                "description": "Gender of driver one",
+                "description": "driver one gender",
                 "is_required": False,
                 "value": None,
                 "enum": ["Male", "Female", "Other"]
               },
               "relationship": {
                 "type": "enum",
-                "description": "Relationship to the policyholder of driver one",
+                "description": "driver one relation to policyholder",
                 "is_required": False,
                 "value": "Self",
                 "enum": ["Spouse", "Child", "Parent", "Self", "Other"]
               },
               "marital_status": {
                 "type": "enum",
-                "description": "Marital status of driver one",
+                "description": "driver one marital status",
                 "is_required": False,
                 "value": None,
                 "enum": ["Single", "Married", "Divorced", "Widowed", "Domestic Partner"]
               },
               "occupation": {
                 "type": "string",
-                "description": "Occupation of driver one",
+                "description": "driver one occupation",
                 "is_required": False,
                 "value": None
               },
               "education": {
                 "type": "enum",
-                "description": "Education level of driver one",
+                "description": "driver one education",
                 "is_required": False,
                 "value": None,
                 "enum": ["High School", "Some College", "Associates Degree", "Bachelors", "Masters", "PhD"]
               },
               "license_status": {
                 "type": "enum",
-                "description": "License status of driver one",
+                "description": "driver one license status",
                 "is_required": False,
                 "value": None,
                 "enum": ["Valid", "Suspended", "Expired"]
               },
               "licensed_state": {
                 "type": "string",
-                "description": "State where the driver one is licensed",
+                "description": "driver one licensed state",
                 "is_required": False,
                 "value": None
               },
               "license_number": {
                 "type": "string",
-                "description": "Driver one's license number (min. 8 chars)",
+                "description": "driver one license number",
                 "is_required": False,
                 "value": None
               },
               "licensed_age": {
                 "type": "integer",
-                "description": "Age when the driver one was licensed",
+                "description": "driver one licensed age",
                 "is_required": False,
                 "value": None
               },
               "rated": {
                 "type": "boolean",
-                "description": "Whether the driver one is rated",
+                "description": "driver one rated?",
                 "is_required": False,
                 "value": None
               },
               "sr22_required": {
                 "type": "boolean",
-                "description": "Whether an SR‑22 is required of driver one",
+                "description": "driver one SR‑22 required?",
                 "is_required": False,
                 "value": None
               },
               "drive_for_rideshare": {
                 "type": "boolean",
-                "description": "Whether the driver one uses rideshare services",
+                "description": "driver one uses rideshare?",
                 "is_required": False,
                 "value": None
               },
               "drive_for_delivery": {
                 "type": "boolean",
-                "description": "Whether the driver one uses delivery services",
+                "description": "driver one uses delivery?",
                 "is_required": False,
                 "value": None
               },
               "driver_discounts": {
                 "type": "string",
-                "description": "Any discounts applicable to the driver one",
+                "description": "driver one discounts",
                 "is_required": False,
                 "value": None
               },
               "good_student_discount": {
                 "type": "boolean",
-                "description": "Good student discount eligibility to driver one",
+                "description": "driver one good student discount?",
                 "is_required": False,
                 "value": None
               },
               "mature_driver_discount": {
                 "type": "boolean",
-                "description": "Mature driver discount eligibility to driver one",
+                "description": "driver one mature driver discount?",
                 "is_required": False,
                 "value": None
               },
               "safe_driver_discount": {
                 "type": "boolean",
-                "description": "Safe driver discount eligibility to driver one",
+                "description": "driver one safe driver discount?",
                 "is_required": False,
                 "value": None
               }
@@ -781,29 +781,29 @@ form = {
       },
       "additional_drivers":{
         "type":"boolean",
-        "description":"Do not add more drivers(ask user if they want to add more drivers)",
+        "description":"Skip more drivers?(ask user to add more?)",
         "is_required":False,
         "value":None
       },
       "number_of_vehicles": {
         "type": "integer",
-        "description": "Number of vehicles to be insured",
+        "description": "Vehicle count",
         "is_required": False,
         "value": None
       },
       "vehicle_details": {
         "type": "list",
-        "description": "List of vehicles covered",
+        "description": "vehicles list",
         "is_required": False,
         "value": [
           {
             "type": "object",
-            "description": "Details for vehicle one",
+            "description": "vehicle one details",
             "is_required": False,
             "value": {
               "vin": {
                 "type": "string",
-                "description": "Vehicle one Identification Number",
+                "description": "Vehicle 1 VIN",
                 "is_required": False,
                 "value": None
               },
@@ -827,44 +827,44 @@ form = {
               },
               "assigned_driver": {
                 "type": "enum",
-                "description": "Assigned driver details of vehicle one",
+                "description": "Vehicle 1 driver name",
                 "is_required": False,
                 "value": None,
                 "enum": []
               },
               "garaged_state": {
                 "type": "string",
-                "description": "State where the vehicle one is garaged",
+                "description": "vehicle one garaged state",
                 "is_required": False,
                 "value": None
               },
               "garaging_address": {
                 "type": "object",
-                "description": "Vehicle one garaging address",
+                "description": "vehicle one garaging address",
                 "ask_collected":True,
                 "is_required": False,
                 "value": {
                   "street_address": {
                     "type": "string",
-                    "description": "Garaging street address of vehicle one",
+                    "description": "vehicle one garaging street",
                     "is_required": False,
                     "value": None
                   },
                   "city": {
                     "type": "string",
-                    "description": "Garaging city of vehicle one",
+                    "description": "vehicle one garaging city",
                     "is_required": False,
                     "value": None
                   },
                   "state": {
                     "type": "string",
-                    "description": "Garaging state of vehicle one",
+                    "description": "vehicle one garaging state",
                     "is_required": False,
                     "value": None
                   },
                   "zip_code": {
                     "type": "string",
-                    "description": "Garaging ZIP or postal code of vehicle one",
+                    "description": "vehicle one garaging zip code",
                     "is_required": False,
                     "value": None
                   }
@@ -872,7 +872,7 @@ form = {
               },
               "annual_miles": {
                 "type": "integer",
-                "description": "Annual miles driven of vehicle one",
+                "description": "vehicle one annual miles",
                 "is_required": False,
                 "value": None
               },
@@ -885,35 +885,35 @@ form = {
               },
               "financed_vehicle": {
                 "type": "boolean",
-                "description": "Is the vehicle one financed?",
+                "description": "vehicle one financed?",
                 "is_required": False,
                 "value": None
               },
               "coverage_details": {
                 "type": "object",
-                "description": "Vehicle‑specific coverages of vehicle one",
+                "description": "vehicle one coverages",
                 "is_required": False,
                 "value": {
                   "comprehensive_deductible": {
-                    "type": "enum",
-                    "description": "Comprehensive deductible amount of vehicle one",
+                    "type": "integer",
+                    "description": "vehicle one comprehensive deductible",
                     "is_required": False,
                     "value": None
                   },
                   "collision_deductible": {
-                    "type": "enum",
-                    "description": "Collision deductible amount of vehicle one",
+                    "type": "integer",
+                    "description": "vehicle one collision deductible",
                     "is_required": False,
                     "value": None
                   },
                   "towing_coverage": {
                     "type": "object",
-                    "description": "Towing coverage details of vehicle one",
+                    "description": "vehicle one towing coverage",
                     "is_required": False,
                     "value": {
                       "coverage_limit": {
                         "type": "integer",
-                        "description": "Towing coverage limit of vehicle one",
+                        "description": "vehicle one towing coverage limit",
                         "is_required": False,
                         "value": None
                       }
@@ -921,18 +921,18 @@ form = {
                   },
                   "rental_reimbursement": {
                     "type": "object",
-                    "description": "Rental reimbursement limits of vehicle one",
+                    "description": "vehicle one rental reimbursement",
                     "is_required": False,
                     "value": {
                       "daily_limit": {
                         "type": "integer",
-                        "description": "Daily limit for rental reimbursement of vehicle one",
+                        "description": "vehicle one daily limit",
                         "is_required": False,
                         "value": None
                       },
                       "total_limit": {
                         "type": "integer",
-                        "description": "Total limit for rental reimbursement of vehicle one",
+                        "description": "vehicle one total limit",
                         "is_required": False,
                         "value": None
                       }
@@ -940,7 +940,7 @@ form = {
                   },
                   "full_glass_coverage": {
                     "type": "boolean",
-                    "description": "Full glass coverage included of vehicle one?",
+                    "description": "vehicle one full glass coverage?",
                     "is_required": False,
                     "value": None
                   }
@@ -948,20 +948,20 @@ form = {
               },
               "rented_on_turo": {
                 "type": "boolean",
-                "description": "Is vehicle one rented on Turo?",
+                "description": "vehicle one rented on Turo?",
                 "is_required": False,
                 "value": None
               },
               "ownership_type": {
                 "type": "enum",
-                "description": "Vehicle one ownership type",
+                "description": "vehicle one ownership type",
                 "is_required": False,
                 "value": None,
                 "enum": ["Owned", "Leased", "Financed"]
               },
               "anti_theft_installed": {
                 "type": "boolean",
-                "description": "Anti‑theft device installed of vehicle one?",
+                "description": "vehicle one anti-theft device installed?",
                 "is_required": False,
                 "value": None
               }
@@ -2125,7 +2125,7 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
 
     finally:
       try:
-        print(db_form_conversion(form.context.data,{"lead_repo":form.context.lead_repo,"questionaire_repo":form.context.questionaire_repo},field_mapping,get_form=False))
+        # print(db_form_conversion(form.context.data,{"lead_repo":form.context.lead_repo,"questionaire_repo":form.context.questionaire_repo},field_mapping,get_form=False))
         normalise(form.context.data)
         normalize_questionnaire(form.context.data["questionaire_repo"])
         log_to_file(f"json file:{form.context.data}")
@@ -2235,7 +2235,7 @@ def validate_date(language_processor_response,data):
                   except Exception as e:
                       log_to_file(f"error in validate_date: {str(e)}")
                       return {"command_type":"reply_to_user","message":"Please provide date again."}
-              elif 'date of birth' in field.lower():
+              elif 'dob' in field.lower():
                   try:
                       value_date = datetime.strptime(value, "%d-%m-%Y") 
                       today_date = datetime.strptime(get_today_date(), "%d-%m-%Y")
@@ -2244,7 +2244,7 @@ def validate_date(language_processor_response,data):
                   except Exception as e:
                       log_to_file(f"error in validate_date: {str(e)}")
                       return {"command_type":"reply_to_user","message":"Please provide date again."}
-          elif 'years at the current' in field.lower():
+          elif 'Years at address' in field.lower():
               try:
                   form_data = data.data
                   log_to_file(f"form_data: {form_data}")
@@ -2258,7 +2258,7 @@ def validate_date(language_processor_response,data):
               except Exception as e:
                   log_to_file(f"error in validate_date: {str(e)}")
                   return {"command_type":"reply_to_user","message":"Please provide Years at current address again."}
-          elif 'age when' in field.lower() and 'licensed' in field.lower():
+          elif 'age' in field.lower() and 'licensed' in field.lower():
               try:
                   if int(value) < 15:
                       return {"command_type":"reply_to_user","message":"Can you please provide age again? Age when licensed cannot be less than 15"}
@@ -2308,7 +2308,7 @@ async def language_processor(data, message):
 
       if user says 'same as before : value' or 'same as this field : value' or 'same as previous field : value' then return {{"command_type":"update","fields":{{"field_description from next_field":"value from user"}}}} do not pass 'same as before' or 'same as this field' or 'same as previous field' text in value. 
       if user provide information that is not in next_field then catagorize and make fields based on descriptions.
-
+      for field 'Skip more [co-insured, driver, vehicle]?' with 'yes' then return {{"command_type":"update","fields":{{"Skip more [co-insured, driver, vehicle]?":"false"}}}} else return {{"command_type":"update","fields":{{"Skip more [co-insured, driver, vehicle]?":"true"}}}}
       field name should be strictly from descriptions.
 
       if user response is not in descriptions then return {{"command_type": "message","message":"message from user"}}
@@ -2345,7 +2345,6 @@ async def language_processor(data, message):
                 )
 
       response = response.to_dict()
-      print("language processor response: ",response)
       prompt_tokens = response["usage"]["prompt_tokens"]
       completion_tokens = response["usage"]["completion_tokens"]
       cached_tokens = response["usage"].get("prompt_tokens_details", {}).get("cached_tokens", 0)
@@ -2357,11 +2356,6 @@ async def language_processor(data, message):
       data.output_tokens += int(completion_tokens)
       data.cached_tokens += int(cached_tokens)
       
-      costs = calculate_costs(actual_input_tokens, cached_tokens, completion_tokens)
-      print(f"Input Tokens: {actual_input_tokens} - Cost: ${costs['input_cost']:.6f}")
-      print(f"Cached Tokens: {cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
-      print(f"Output Tokens: {completion_tokens} - Cost: ${costs['output_cost']:.6f}")
-      print(f"Total Cost: ${costs['total_cost']:.6f}")
       
       response = json.loads(response["choices"][0]["message"]["content"])
       if response['command_type'] == 'reply_to_user':
@@ -2473,12 +2467,6 @@ async def json_agent(data,message):
           data.output_tokens += int(output_tokens_sum)
           data.cached_tokens += int(cached_tokens_sum)
           
-          costs = calculate_costs(actual_input_tokens_sum, cached_tokens_sum, output_tokens_sum)
-          print(f"Input Tokens: {actual_input_tokens_sum} - Cost: ${costs['input_cost']:.6f}")
-          print(f"Cached Tokens: {cached_tokens_sum} - Cost: ${costs['cached_cost']:.6f}")
-          print(f"Output Tokens: {output_tokens_sum} - Cost: ${costs['output_cost']:.6f}")
-          print(f"Total Cost: ${costs['total_cost']:.6f}")
-          
           break
       except Exception as e:
           last_error = e
@@ -2571,118 +2559,120 @@ async def validation_agent(data):
   log_to_file(f"validation_agent response: {response}")
   return response
 
-def get_suggestion_values(data):
-    path = data['json_path']
+def get_suggestion_values(data,nxt):
+    path = nxt['json_path']
     suggestion_values = []
     if 'questionaire_repo.value.vehicle_details.value[' in path and '].value.garaging_address.value' in path:
-        insured_address = data['data']['questionaire_repo']['value']['insured_address']['value']
+        insured_address = data.data['lead_repo']['value']['address_detail']['value']['insured_address']['value']
         suggestion_values.append(f"insured address: {insured_address}")
-        mail_address = data['data']['questionaire_repo']['value']['mailing_address']['value']
+        mail_address = data.data['lead_repo']['value']['address_detail']['value']['mailing_address']['value']
         suggestion_values.append(f"mailing address: {mail_address}")
-        for co_insured in data['data']['questionaire_repo']['value']['co_insured']['value']:
-            suggestion_values.append(f"co-insured address: {co_insured['value']['address']['value']}")
     return suggestion_values
 
 async def reply_agent(data,message):
-  log_to_file("reply_agent called")
-  print("reply_agent called :",message)
-  history = data.history
-  log_to_file(f"history: {history}")
-  filled_fields = str(extract_non_null_values(data.data)).strip()
-  log_to_file(f"filled_fields: {filled_fields}")
-  nxt = next_field(data.data)
-  suggestion_values = get_suggestion_values(nxt)
-  prompt = f"""
-  You are 'Robert', a friendly and proffesional agent from Nationwide Insurance Agency.
-  Your role is to assist users in completing their insurance information by analyzing the chat history and the current state of filled fields.
+  try:
+    log_to_file("reply_agent called")
+    print("reply_agent called :",message)
+    history = data.history
+    log_to_file(f"history: {history}")
+    filled_fields = str(extract_non_null_values(data.data)).strip()
+    log_to_file(f"filled_fields: {filled_fields}")
+    nxt = next_field(data.data)
+    suggestion_values = get_suggestion_values(data,nxt)
+    prompt = f"""
+    You are 'Robert', a friendly and proffesional agent from Nationwide Insurance Agency.
+    Your role is to assist users in completing their insurance information by analyzing the chat history and the current state of filled fields.
 
-  Available Data:
-  1. filled_fields: A dict containing already provided user information, e.g., {{"name of insured":"john"}}.
-  2. history: A chronological list of messages exchanged between the user and you.
-  3. next_field: next_field that needs to be filled.
-  4. message: message from json_agent.
+    Available Data:
+    1. filled_fields: A dict containing already provided user information, e.g., {{"name of insured":"john"}}.
+    2. history: A chronological list of messages exchanged between the user and you.
+    3. next_field: next_field that needs to be filled.
+    4. message: message from json_agent.
 
-  Instructions:
+    Instructions:
 
-  0. if user asks for any details and message from json_agent provide that details then return that in reply message.
+    0. if user asks for any details and message from json_agent provide that details then return that in reply message.
 
-  1.  analyze next_field:
-    - Determine a list of the next required fields that needs to be collected from user and ask thos fields to user strictly all at once.
-    - provide enums if any.
+    1.  analyze next_field:
+      - Determine a list of the next required fields that needs to be collected from user and ask thos fields to user strictly all at once.
+      - provide enums if any.
 
-  2. If the required field closely matches any existing descriptions in filled_fields, suggest those values as options or suggest from your knowledge as suggestion_values to the user, can be blank as well.
-    - you can suggest from your knowledge as well( like you can suggest state and zip code based on city or education based on occupation)
-    - you can also look at the enums and suggest best enum value for the field based on already filled fields.
+    2. If the required field closely matches any existing descriptions in filled_fields, suggest those values as options or suggest from your knowledge as suggestion_values to the user, can be blank as well.
+      - you can suggest from your knowledge as well( like you can suggest state and zip code based on city or education based on occupation)
+      - you can also look at the enums and suggest best enum value for the field based on already filled fields.
 
-  3. When responding to the user:
-    - Maintain a friendly and proffesional tone an help user to fill form.
-    - Clearly specify the next piece of information required.
-    - Provide suggested options (enums) if applicable.
+    3. When responding to the user:
+      - Maintain a friendly and proffesional tone an help user to fill form.
+      - Clearly specify the next piece of information required.
+      - Provide suggested options (enums) if applicable.
 
-  if you are asking for multiple fields at once then ask them in bullet points and only ask for fields from next_field.
-  do not ask for fields that are not in next_field strictly.
+    if you are asking for multiple fields at once then ask them in bullet points and only ask for fields from next_field.
+    do not ask for fields that are not in next_field strictly.
 
-  do not ask date in any structure.
+    do not ask date in any structure.
 
-  give suggestions as "same as previous field : value" or "same as this field : value" or "same as before : value" if same information is already filled in previous field for all fields combined in next_field.
-  do not suggest same value two times and only one suggestion from multiple enums not all.  
-  if you are providing suggestion for multiple fields provide that in a single suggestion.
-  Response Format:
-  {{
-    message: string,         # The message content that will be sent to user should be in friendly tone.
-    enums: list[string] or None,  # Suggested options for the user, if any.
-    suggestion_values : list[string] or None, # suggestion for the user to fill the field.
-  }}
+    give suggestions as "same as previous field : value" or "same as this field : value" or "same as before : value" if same information is already filled in previous field for all fields combined in next_field.
+    do not suggest same value two times and only one suggestion from multiple enums not all.  
+    if you are providing suggestion for multiple fields provide that in a single suggestion.
+    Response Format:
+    {{
+      message: string,         # The message content that will be sent to user should be in friendly tone.
+      enums: list[string] or None,  # Suggested options for the user, if any.
+      suggestion_values : list[string] or None, # suggestion for the user to fill the field.
+    }}
 
-  Note:
-  - Ensure clarity and specificity in your messages.
-  - Use delimiters or formatting to highlight key information when necessary.
-  """
+    Note:
+    - Ensure clarity and specificity in your messages.
+    - Use delimiters or formatting to highlight key information when necessary.
+    """
 
-  if suggestion_values:
-    prompt += f"\n\nSuggestion Values: {suggestion_values}"
+    if suggestion_values:
+      prompt += f"\n\nSuggestion Values: {suggestion_values}"
 
-  client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-  response = await client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant designed to output JSON.",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"{prompt},filled_fields: {filled_fields},history: {history},next_field: {nxt},message: {message}",
-                    },
-                ],
-                model = 'gpt-4.1-mini',
-                max_tokens=16384,
-                response_format={"type": "json_object"},
-            )
+    response = await client.chat.completions.create(
+                  messages=[
+                      {
+                          "role": "system",
+                          "content": "You are a helpful assistant designed to output JSON.",
+                      },
+                      {
+                          "role": "user",
+                          "content": f"{prompt},filled_fields: {filled_fields},history: {history},next_field: {nxt},message: {message}",
+                      },
+                  ],
+                  model = 'gpt-4.1-mini',
+                  max_tokens=16384,
+                  response_format={"type": "json_object"},
+              )
 
-  response = response.to_dict()
-  prompt_tokens = response["usage"]["prompt_tokens"]
-  completion_tokens = response["usage"]["completion_tokens"]
-  cached_tokens = response["usage"].get("prompt_tokens_details", {}).get("cached_tokens", 0)
-  
-  # Calculate actual input tokens (total input - cached)
-  actual_input_tokens = prompt_tokens - cached_tokens
-  
-  data.input_tokens += int(actual_input_tokens)
-  data.output_tokens += int(completion_tokens)
-  data.cached_tokens += int(cached_tokens)
-  
-  costs = calculate_costs(actual_input_tokens, cached_tokens, completion_tokens)
-  print(f"Input Tokens: {actual_input_tokens} - Cost: ${costs['input_cost']:.6f}")
-  print(f"Cached Tokens: {cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
-  print(f"Output Tokens: {completion_tokens} - Cost: ${costs['output_cost']:.6f}")
-  print(f"Total Cost: ${costs['total_cost']:.6f}")
+    response = response.to_dict()
+    prompt_tokens = response["usage"]["prompt_tokens"]
+    completion_tokens = response["usage"]["completion_tokens"]
+    cached_tokens = response["usage"].get("prompt_tokens_details", {}).get("cached_tokens", 0)
+    
+    # Calculate actual input tokens (total input - cached)
+    actual_input_tokens = prompt_tokens - cached_tokens
+    
+    data.input_tokens += int(actual_input_tokens)
+    data.output_tokens += int(completion_tokens)
+    data.cached_tokens += int(cached_tokens)
+    
+    costs = calculate_costs(actual_input_tokens, cached_tokens, completion_tokens)
+    print(f"Input Tokens: {actual_input_tokens} - Cost: ${costs['input_cost']:.6f}")
+    print(f"Cached Tokens: {cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
+    print(f"Output Tokens: {completion_tokens} - Cost: ${costs['output_cost']:.6f}")
+    print(f"Total Cost: ${costs['total_cost']:.6f}")
 
-  
-  response = json.loads(response["choices"][0]["message"]["content"])
-  data.history.append({"role":"assistant","content":f"message: {response['message']} - enums: {response['enums']} - suggestion_values: {response['suggestion_values']}"})
-  log_to_file(f"reply_agent response: {response}")
-  return response
+    
+    response = json.loads(response["choices"][0]["message"]["content"])
+    data.history.append({"role":"assistant","content":f"message: {response['message']} - enums: {response['enums']} - suggestion_values: {response['suggestion_values']}"})
+    log_to_file(f"reply_agent response: {response}")
+    return response
+  except Exception as e:
+    log_to_file(f"error in reply_agent: {str(e)}")
+    
 
 async def chat_pipeline(data,message):
   processed_message = await language_processor(data,message)
@@ -2814,26 +2804,27 @@ questionaire_repo = {
       } 
 }
 
+normalise(form)
+data = Form(data=form,history=[],language_processor_response=[],lead_repo=lead_repo,questionaire_repo=questionaire_repo,input_tokens=0,output_tokens=0,cached_tokens=0)
 
 async def main():
     print("Assistant:", "Hi! To get started with your insurance information, could you please provide Your Full Name.")
 
     while True:
-        normalise(form)
+        
         db_data = {
           'lead_repo': lead_repo,
           'questionaire_repo': questionaire_repo
         }
-        updated_form = db_form_conversion(form, db_data, field_mapping, get_form=True)
-        updated_data = Form(data=updated_form,history=[],language_processor_response=[],lead_repo=lead_repo,questionaire_repo=questionaire_repo,input_tokens=0,output_tokens=0,cached_tokens=0)
+        # updated_form = db_form_conversion(form, db_data, field_mapping, get_form=True)
         user_input = input("User: ")
-        response = await chat_pipeline(updated_data, user_input)
-        costs = calculate_costs(updated_data.input_tokens, updated_data.cached_tokens, updated_data.output_tokens)
-        total_tokens = updated_data.input_tokens + updated_data.cached_tokens + updated_data.output_tokens
+        response = await chat_pipeline(data, user_input)
+        costs = calculate_costs(data.input_tokens, data.cached_tokens, data.output_tokens)
+        total_tokens = data.input_tokens + data.cached_tokens + data.output_tokens
         
-        print(f"Input Tokens: {updated_data.input_tokens} - Cost: ${costs['input_cost']:.6f}")
-        print(f"Cached Tokens: {updated_data.cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
-        print(f"Output Tokens: {updated_data.output_tokens} - Cost: ${costs['output_cost']:.6f}")
+        print(f"Input Tokens: {data.input_tokens} - Cost: ${costs['input_cost']:.6f}")
+        print(f"Cached Tokens: {data.cached_tokens} - Cost: ${costs['cached_cost']:.6f}")
+        print(f"Output Tokens: {data.output_tokens} - Cost: ${costs['output_cost']:.6f}")
         print(f"Total Tokens: {total_tokens} - Total Cost: ${costs['total_cost']:.6f}")
         print(response)
 

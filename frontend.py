@@ -227,7 +227,9 @@ if not st.session_state.app_started:
                 language_processor_response=[],
                 input_tokens=0,
                 output_tokens=0,
-                cached_tokens=0
+                cached_tokens=0,
+                lead_repo={},
+                questionaire_repo={}
             )
             
             # Initialize other session state variables
@@ -1371,7 +1373,7 @@ def process_step_by_step():
                         st.session_state.processing_message = f"🔧 Fixing validation issues... (retries left: {st.session_state.validation_tries})"
                         # Update the message to follow the commands and retry
                         st.session_state.processed_data = {
-                            {"update": validation_response["commands"]}
+                            "update": validation_response["commands"]
                         }
                         st.session_state.processing_step = 3  # Go back to JSON agent step
                         st.rerun()
@@ -1387,6 +1389,7 @@ def process_step_by_step():
             st.session_state.processing_step = 5
             st.rerun()
         except Exception as e:
+            print("validation failed",str(e))
             st.error(f"Validation failed: {str(e)}")
             st.session_state.is_typing = False
             st.session_state.processing_step = 0
