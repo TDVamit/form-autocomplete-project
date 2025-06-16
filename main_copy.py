@@ -268,6 +268,12 @@ form = {
       "description": "Questionnaire repo",
       "is_required": False,
       "value": {
+      "number_of_co_insured": {
+          "type": "integer",
+          "description": "Number of co-insured",
+          "is_required": False,
+          "value": None
+      },
       "co_insured": {
           "type": "list",
           "description": "List of co‑insured entries",
@@ -295,21 +301,15 @@ form = {
                       "marital_status":      {"type":"enum","description":"Marital status","is_required":False,"value":None,"enum":["Single","Married","Divorced","Widowed","Domestic Partner"]},
                       "occupation":          {"type":"string","description":"Occupation","is_required":False,"value":None},
                       "education":           {"type":"enum","description":"Education level","is_required":False,"value":None,"enum":["High School","Some College","Associates Degree","Bachelors","Masters","PhD"]},
-                      "license_status":      {"type":"enum","description":"License status","is_required":False,"value":None,"enum":["Valid","Suspended","Expired"]},
-                      "licensed_state":      {"type":"string","description":"Licensed state","is_required":False,"value":None},
-                      "license_number":      {"type":"string","description":"License number","is_required":False,"value":None},
-                      "licensed_age":        {"type":"integer","description":"Licensed age","is_required":False,"value":None},
-                      "rated":               {"type":"boolean","description":"Rated driver?","is_required":False,"value":None},
-                      "sr22_required":       {"type":"boolean","description":"SR‑22 required?","is_required":False,"value":None},
-                      "drive_for_rideshare": {"type":"boolean","description":"Drives rideshare?","is_required":False,"value":None},
-                      "drive_for_delivery":  {"type":"boolean","description":"Drives delivery?","is_required":False,"value":None},
-                      "driver_discounts":    {"type":"string","description":"Driver discounts","is_required":False,"value":None},
-                      "good_student_discount":{"type":"boolean","description":"Good student discount?","is_required":False,"value":None},
-                      "mature_driver_discount":{"type":"boolean","description":"Mature driver discount?","is_required":False,"value":None},
-                      "safe_driver_discount":{"type":"boolean","description":"Safe driver discount?","is_required":False,"value":None},
                   }
               }
           ]
+      },
+      "additional_co_insured": {
+        "type": "boolean",
+        "description": "Additional co-insured",
+        "is_required": False,
+        "value": None
       },
       "policy_details": {
           "type": "object",
@@ -348,7 +348,16 @@ form = {
               "bathroom_quality":        {"type":"string","description":"Bathroom quality","is_required":False,"value":None},
               "garage_type":             {"type":"enum","description":"GarageType","is_required":False,"value":None},
               "garage_stalls":           {"type":"integer","description":"Garage stalls","is_required":False,"value":None},
-              "detached_structure_types":{"type":"list","description":"Detached structures","is_required":False,"value":[]},
+              "number_of_detached_structures":{"type":"integer","description":"Number of detached structures","is_required":False,"value":None},
+              "detached_structure_types":{"type":"list","description":"Detached structures","is_required":False,"value":[
+                {"type":"object","description":"Detached structures details","is_required":False,"value":{"detached_structure_type":{
+                  "type": "object",
+                  "description": "Detached structure one",
+                  "is_required": False,
+                  "value": None
+                }}}
+              ]},
+              "additional_structures":{"type":"boolean","description":"Additional structures","is_required":False,"value":None},
               "number_of_occupants":     {"type":"integer","description":"Number of occupants","is_required":False,"value":None},
           }
       },
@@ -358,7 +367,16 @@ form = {
           "is_required": False,
           "value": {
               "has_animals":              {"type":"boolean","description":"Has animals?","is_required":False,"value":None},
-              "animals":                  {"type":"list","description":"Animal types","is_required":False,"value":[]},
+              "number_of_animals":        {"type":"integer","description":"Number of animals","is_required":False,"value":None},
+              "animals":                  {"type":"list","description":"Animal types","is_required":False,"value":[
+                {"type":"object","description":"Animal one","is_required":False,"value":{"animal_type":{
+                  "type": "object",
+                  "description": "Animal one",
+                  "is_required": False,
+                  "value": None
+                }}}
+              ]},
+              "additional_animals":{"type":"boolean","description":"Additional animals","is_required":False,"value":None},
               "other_animals":            {"type":"string","description":"Othser animals","is_required":False,"value":None},
               "has_trampoline":           {"type":"boolean","description":"Has trampoline?","is_required":False,"value":None},
               "has_pool":                 {"type":"boolean","description":"Has pool?","is_required":False,"value":None},
@@ -411,6 +429,18 @@ co_insured = [
         }
     ]
 
+animals = [
+    {
+        "animal_type": None
+    }
+]
+
+detached_structures = [
+    {
+        "detached_structure_type": None
+    }
+]
+
 field_mapping = {
 
     "lead_repo.value.insured.value.first_name.value":           "lead_repo.insured.first_name",
@@ -454,7 +484,8 @@ field_mapping = {
     "lead_repo.value.address_detail.value.county.value":
                                                                "lead_repo.address_detail.county",
 
-
+    "questionaire_repo.value.number_of_co_insured.value": "questionaire_repo.number_of_co_insured",
+    "questionaire_repo.value.additional_co_insured.value": "questionaire_repo.additional_co_insured",
     "questionaire_repo.value.policy_details.value.effective_date.value":
                                                                "questionaire_repo.policy_details.effective_date",
     "questionaire_repo.value.policy_details.value.use.value":
@@ -506,13 +537,18 @@ field_mapping = {
                                                                "questionaire_repo.property_details.garage_stalls",
     "questionaire_repo.value.property_details.value.detached_structure_types.value":
                                                                "questionaire_repo.property_details.detached_structure_types",
+    "questionaire_repo.value.property_details.value.additional_structures.value":
+                                                               "questionaire_repo.property_details.additional_structures",
     "questionaire_repo.value.property_details.value.number_of_occupants.value":
                                                                "questionaire_repo.property_details.number_of_occupants",
 
     "questionaire_repo.value.risk_details.value.has_animals.value":
                                                                "questionaire_repo.risk_details.has_animals",
-    "questionaire_repo.value.risk_details.value.animals.value":
-                                                               "questionaire_repo.risk_details.animals",
+    "questionaire_repo.value.risk_details.value.number_of_animals.value":
+                                                               "questionaire_repo.risk_details.number_of_animals",
+
+    "questionaire_repo.value.risk_details.value.additional_animals.value":
+                                                               "questionaire_repo.risk_details.additional_animals",
     "questionaire_repo.value.risk_details.value.other_animals.value":
                                                                "questionaire_repo.risk_details.other_animals",
     "questionaire_repo.value.risk_details.value.has_trampoline.value":
@@ -535,7 +571,9 @@ field_mapping = {
 
 
 field_mapping_lists = {
-    "questionaire_repo.value.co_insured.value":                         "questionaire_repo.co_insured",
+    "questionaire_repo.value.co_insured.value":"questionaire_repo.co_insured",
+    "questionaire_repo.value.risk_details.value.animals.value":"questionaire_repo.risk_details.animals",
+    "questionaire_repo.value.property_details.value.detached_structure_types.value": "questionaire_repo.property_details.detached_structure_types",
 }
 
 # 1. co_insured subfield mapping
@@ -549,28 +587,28 @@ co_insured_field_map = {
     "value.marital_status.value":           "marital_status",
     "value.occupation.value":               "occupation",
     "value.education.value":                "education",
-    "value.license_status.value":           "license_status",
-    "value.licensed_state.value":           "licensed_state",
-    "value.license_number.value":           "license_number",
-    "value.licensed_age.value":             "licensed_age",
-    "value.rated.value":                    "rated",
-    "value.sr22_required.value":            "sr22_required",
-    "value.drive_for_rideshare.value":      "drive_for_rideshare",
-    "value.drive_for_delivery.value":       "drive_for_delivery",
-    "value.driver_discounts.value":         "driver_discounts",
-    "value.good_student_discount.value":    "good_student_discount",
-    "value.mature_driver_discount.value":   "mature_driver_discount",
-    "value.safe_driver_discount.value":     "safe_driver_discount",
 }
 
+animal_field_map = {
+    "value.animal_type.value": "animal_type",
+
+}
+
+detached_structure_field_map = {
+    "value.detached_structure_type.value": "detached_structure_type",
+}
 
 
 def sync_lists(form: dict,db_data: dict,mapping:dict,get_form:bool=True) -> dict:
     data_mapping_lists = {
       "questionaire_repo.value.co_insured.value": co_insured_field_map,
+      "questionaire_repo.value.risk_details.value.animals.value": animal_field_map,
+      "questionaire_repo.value.property_details.value.detached_structure_types.value": detached_structure_field_map,
       }
     copy_list_mapping_lists = {
       "questionaire_repo.value.co_insured.value": co_insured,
+      "questionaire_repo.value.risk_details.value.animals.value": animals,
+      "questionaire_repo.value.property_details.value.detached_structure_types.value": detached_structures,
       }
     for form_path, db_path in mapping.items():
         form_tokens = _parse_tokens(form_path)
@@ -1025,19 +1063,23 @@ def _clear_values(node: Any):
 def resize_list_with_ordinal(data: dict, list_path: List[Union[str,int]], new_count: int):
 
     co_insured_list = {'type': 'object', 'description': 'Details for co‑insured one', 'is_required': False, 'value': {'name': {'type': 'object', 'description': "Co‑insured one's name", 'ask_collected': True, 'is_required': False, 'value': {'first_name': {'type': 'string', 'description': 'First name of co‑insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.name.value.first_name.value'}, 'middle_name': {'type': 'string', 'description': 'Middle name of co‑insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.name.value.middle_name.value'}, 'last_name': {'type': 'string', 'description': 'Last name of co‑insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.name.value.last_name.value'}}, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.name.value'}, 'date_of_birth': {'type': 'date', 'description': 'Date of birth of co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.date_of_birth.value'}, 'gender': {'type': 'enum', 'description': 'Gender of co-insured one', 'is_required': False, 'value': None, 'enum': ['Male', 'Female', 'Other'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.gender.value'}, 'relationship': {'type': 'enum', 'description': 'Relationship to the policyholder of co-insured one', 'is_required': False, 'value': None, 'enum': ['Spouse', 'Child', 'Parent', 'Other'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.relationship.value'}, 'marital_status': {'type': 'enum', 'description': 'Marital status of co-insured one', 'is_required': False, 'value': None, 'enum': ['Single', 'Married', 'Divorced', 'Widowed', 'Domestic Partner'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.marital_status.value'}, 'occupation': {'type': 'string', 'description': 'Occupation of co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.occupation.value'}, 'education': {'type': 'enum', 'description': 'Education level of co-insured one', 'is_required': False, 'value': None, 'enum': ['High School', 'Some College', 'Associates Degree', 'Bachelors', 'Masters', 'PhD'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.education.value'}, 'license_status': {'type': 'enum', 'description': 'License status of co-insured one', 'is_required': False, 'value': None, 'enum': ['Valid', 'Suspended', 'Expired'], 'json_path': 'questionaire_repo.value.co_insured.value[0].value.license_status.value'}, 'licensed_state': {'type': 'string', 'description': 'State where the co-insured one is licensed', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.licensed_state.value'}, 'license_number': {'type': 'string', 'description': "Co-insured one's license number (min. 8 chars)", 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.license_number.value'}, 'licensed_age': {'type': 'integer', 'description': 'Age when the co-insured one was licensed', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.licensed_age.value'}, 'rated': {'type': 'boolean', 'description': 'Whether the co-insured one is rated', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.rated.value'}, 'sr22_required': {'type': 'boolean', 'description': 'Whether an SR‑22 is required of co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.sr22_required.value'}, 'drive_for_rideshare': {'type': 'boolean', 'description': 'Whether the co-insured one uses rideshare services', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.drive_for_rideshare.value'}, 'drive_for_delivery': {'type': 'boolean', 'description': 'Whether the co-insured one uses delivery services', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.drive_for_delivery.value'}, 'driver_discounts': {'type': 'string', 'description': 'Any discounts applicable to the co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.driver_discounts.value'}, 'good_student_discount': {'type': 'boolean', 'description': 'Good student discount eligibility to co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.good_student_discount.value'}, 'mature_driver_discount': {'type': 'boolean', 'description': 'Mature driver discount eligibility to co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.mature_driver_discount.value'}, 'safe_driver_discount': {'type': 'boolean', 'description': 'Safe driver discount eligibility to co-insured one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.co_insured.value[0].value.safe_driver_discount.value'}}, 'json_path': 'questionaire_repo.value.co_insured.value[0].value'}
-    driver_list = {'type': 'object', 'description': 'Details for driver one', 'is_required': False, 'value': {'name': {'type': 'object', 'description': "Driver one's name", 'ask_collected': True, 'is_required': False, 'value': {'first_name': {'type': 'string', 'description': 'First name of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.name.value.first_name.value'}, 'middle_name': {'type': 'string', 'description': 'Middle name of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.name.value.middle_name.value'}, 'last_name': {'type': 'string', 'description': 'Last name of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.name.value.last_name.value'}}, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.name.value'}, 'date_of_birth': {'type': 'date', 'description': 'Date of birth of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.date_of_birth.value'}, 'gender': {'type': 'enum', 'description': 'Gender of driver one', 'is_required': False, 'value': None, 'enum': ['Male', 'Female', 'Other'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.gender.value'}, 'relationship': {'type': 'enum', 'description': 'Relationship to the policyholder of driver one', 'is_required': False, 'value': 'Self', 'enum': ['Spouse', 'Child', 'Parent', 'Self', 'Other'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.relationship.value'}, 'marital_status': {'type': 'enum', 'description': 'Marital status of driver one', 'is_required': False, 'value': None, 'enum': ['Single', 'Married', 'Divorced', 'Widowed', 'Domestic Partner'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.marital_status.value'}, 'occupation': {'type': 'string', 'description': 'Occupation of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.occupation.value'}, 'education': {'type': 'enum', 'description': 'Education level of driver one', 'is_required': False, 'value': None, 'enum': ['High School', 'Some College', 'Associates Degree', 'Bachelors', 'Masters', 'PhD'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.education.value'}, 'license_status': {'type': 'enum', 'description': 'License status of driver one', 'is_required': False, 'value': None, 'enum': ['Valid', 'Suspended', 'Expired'], 'json_path': 'questionaire_repo.value.driver_details.value[0].value.license_status.value'}, 'licensed_state': {'type': 'string', 'description': 'State where the driver one is licensed', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.licensed_state.value'}, 'license_number': {'type': 'string', 'description': "Driver one's license number (min. 8 chars)", 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.license_number.value'}, 'licensed_age': {'type': 'integer', 'description': 'Age when the driver one was licensed', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.licensed_age.value'}, 'rated': {'type': 'boolean', 'description': 'Whether the driver one is rated', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.rated.value'}, 'sr22_required': {'type': 'boolean', 'description': 'Whether an SR‑22 is required of driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.sr22_required.value'}, 'drive_for_rideshare': {'type': 'boolean', 'description': 'Whether the driver one uses rideshare services', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.drive_for_rideshare.value'}, 'drive_for_delivery': {'type': 'boolean', 'description': 'Whether the driver one uses delivery services', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.drive_for_delivery.value'}, 'driver_discounts': {'type': 'string', 'description': 'Any discounts applicable to the driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.driver_discounts.value'}, 'good_student_discount': {'type': 'boolean', 'description': 'Good student discount eligibility to driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.good_student_discount.value'}, 'mature_driver_discount': {'type': 'boolean', 'description': 'Mature driver discount eligibility to driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.mature_driver_discount.value'}, 'safe_driver_discount': {'type': 'boolean', 'description': 'Safe driver discount eligibility to driver one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.driver_details.value[0].value.safe_driver_discount.value'}}, 'json_path': 'questionaire_repo.value.driver_details.value[0].value'}
-    vehicle_list ={'type': 'object', 'description': 'Details for vehicle one', 'is_required': False, 'value': {'vin': {'type': 'string', 'description': 'Vehicle one Identification Number', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.vin.value'}, 'make': {'type': 'string', 'description': 'Vehicle one make', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.make.value'}, 'model': {'type': 'string', 'description': 'Vehicle one model', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.model.value'}, 'year': {'type': 'integer', 'description': 'Vehicle one year', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.year.value'}, 'assigned_driver': {'type': 'enum', 'description': 'Assigned driver details of vehicle one', 'is_required': False, 'value': None, 'enum': [], 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.assigned_driver.value'}, 'garaged_state': {'type': 'string', 'description': 'State where the vehicle one is garaged', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaged_state.value'}, 'garaging_address': {'type': 'object', 'description': 'Vehicle one garaging address', 'ask_collected': True, 'is_required': False, 'value': {'street_address': {'type': 'string', 'description': 'Garaging street address of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value.street_address.value'}, 'city': {'type': 'string', 'description': 'Garaging city of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value.city.value'}, 'state': {'type': 'string', 'description': 'Garaging state of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value.state.value'}, 'zip_code': {'type': 'string', 'description': 'Garaging ZIP or postal code of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value.zip_code.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.garaging_address.value'}, 'annual_miles': {'type': 'integer', 'description': 'Annual miles driven of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.annual_miles.value'}, 'vehicle_usage': {'type': 'enum', 'description': 'Vehicle one usage type', 'is_required': False, 'value': None, 'enum': ['Pleasure', 'Commute', 'Business', 'Rideshare'], 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.vehicle_usage.value'}, 'financed_vehicle': {'type': 'boolean', 'description': 'Is the vehicle one financed?', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.financed_vehicle.value'}, 'coverage_details': {'type': 'object', 'description': 'Vehicle‑specific coverages of vehicle one', 'is_required': False, 'value': {'comprehensive_deductible': {'type': 'enum', 'description': 'Comprehensive deductible amount of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.comprehensive_deductible.value'}, 'collision_deductible': {'type': 'enum', 'description': 'Collision deductible amount of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.collision_deductible.value'}, 'towing_coverage': {'type': 'object', 'description': 'Towing coverage details of vehicle one', 'is_required': False, 'value': {'coverage_limit': {'type': 'integer', 'description': 'Towing coverage limit of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.towing_coverage.value.coverage_limit.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.towing_coverage.value'}, 'rental_reimbursement': {'type': 'object', 'description': 'Rental reimbursement limits of vehicle one', 'is_required': False, 'value': {'daily_limit': {'type': 'integer', 'description': 'Daily limit for rental reimbursement of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.rental_reimbursement.value.daily_limit.value'}, 'total_limit': {'type': 'integer', 'description': 'Total limit for rental reimbursement of vehicle one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.rental_reimbursement.value.total_limit.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.rental_reimbursement.value'}, 'full_glass_coverage': {'type': 'boolean', 'description': 'Full glass coverage included of vehicle one?', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value.full_glass_coverage.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.coverage_details.value'}, 'rented_on_turo': {'type': 'boolean', 'description': 'Is vehicle one rented on Turo?', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.rented_on_turo.value'}, 'ownership_type': {'type': 'enum', 'description': 'Vehicle one ownership type', 'is_required': False, 'value': None, 'enum': ['Owned', 'Leased', 'Financed'], 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.ownership_type.value'}, 'anti_theft_installed': {'type': 'boolean', 'description': 'Anti‑theft device installed of vehicle one?', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value.anti_theft_installed.value'}}, 'json_path': 'questionaire_repo.value.vehicle_details.value[0].value'}
+    detached_structure_list = {'type': 'object', 'description': 'Detached structures details', 'is_required': False, 'value': {'detached_structure_type': {'type': 'object', 'description': 'Detached structure one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.property_details.value.detached_structure_types.value[0].value.detached_structure_type.value'}}, 'json_path': 'questionaire_repo.value.property_details.value.detached_structure_types.value[0].value'}
+    animals_list ={'type': 'object', 'description': 'Animal one', 'is_required': False, 'value': {'animal_type': {'type': 'object', 'description': 'Animal one', 'is_required': False, 'value': None, 'json_path': 'questionaire_repo.value.risk_details.value.animals.value[0].value.animal_type.value'}}, 'json_path': 'questionaire_repo.value.risk_details.value.animals.value[0].value'}
+
     list_type_mapping = {
-        "vehicle_details":vehicle_list,
+        "detached_structure_types":detached_structure_list,
         "co_insured":co_insured_list,
-        "driver_details":driver_list,
+        "animals":animals_list,
     }
     
     cur = data
     for t in list_path:
         cur = cur[t]
     lst = cur  # this is the list itself
-    template = lst[0] if lst else list_type_mapping[list_path[2]]
+    for key,value in list_type_mapping.items():
+        if key in list_path:
+            available_template = value
+    template = lst[0] if lst else available_template
     if new_count < 1:
         lst.clear()
         return
@@ -1088,7 +1130,7 @@ def normalize_questionnaire(q_repo: dict) -> dict:
                   _recurse_and_fix(elt, correct_idx)
 
       # the three lists we care about
-      groups = ["driver_details", "co_insured", "vehicle_details"]
+      groups = ["detached_structure_types", "co_insured", "animals"]
 
       for field in groups:
           items = q_repo["value"].get(field, {}).get("value") or []
@@ -1105,9 +1147,9 @@ def normalize_questionnaire(q_repo: dict) -> dict:
 
       # now update the counts
       count_fields = {
-          "number_of_drivers":    len(q_repo["value"].get("driver_details", {}).get("value", [])),
+          "number_detached_structures":    len(q_repo["value"].get("property_details", {}).get("value", {}).get("detached_structure_types", {}).get("value", [])),
           "number_of_co_insured": len(q_repo["value"].get("co_insured",    {}).get("value", [])),
-          "number_of_vehicles":   len(q_repo["value"].get("vehicle_details", {}).get("value", []))
+          "number_of_animals    ":   len(q_repo["value"].get("risk_details", {}).get("value", {}).get("animals", {}).get("value", []))
       }
       for cf, new_val in count_fields.items():
           node = q_repo["value"].get(cf)
@@ -1252,21 +1294,21 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
             for tok in tokens
         )
 
-        # number_of_drivers → resize driver_details list
-        if json_path.endswith("questionaire_repo.value.number_of_drivers.value"):
+        # number_of_detached → resize detached_details list
+        if json_path.endswith("questionaire_repo.value.number_of_detached.value"):
             count = int(value or 0)
             resize_list_with_ordinal(
                 form.context.data,
-                ["questionaire_repo", "value", "driver_details", "value"],
+                ["questionaire_repo", "value", "detached_details", "value"],
                 count
             )
             update_assigned_driver_enums(form.context.data)
 
-        elif json_path.endswith("questionaire_repo.value.number_of_vehicles.value"):
+        elif json_path.endswith("questionaire_repo.value.number_of_animals.value"):
             count = int(value or 0)
             resize_list_with_ordinal(
                 form.context.data,
-                ["questionaire_repo", "value", "vehicle_details", "value"],
+                ["questionaire_repo", "value", "animal_details", "value"],
                 count
             )
             update_assigned_driver_enums(form.context.data)
@@ -1338,38 +1380,6 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
                 except Exception as e:
                     log_to_file(f"Error auto-updating marital status for co-insured: {str(e)}")
         
-        # Handle additional_drivers boolean field
-        elif json_path.endswith("questionaire_repo.value.additional_drivers.value"):
-            try:
-                if value is False:
-                    # Add one more driver but don't store the false value
-                    current_drivers = form.context.data["questionaire_repo"]["value"]["number_of_drivers"]["value"] or 1
-                    new_driver_count = current_drivers + 1
-                    
-                    # Update number_of_drivers
-                    form.context.data["questionaire_repo"]["value"]["number_of_drivers"]["value"] = new_driver_count
-                    
-                    # Resize driver list
-                    resize_list_with_ordinal(
-                        form.context.data,
-                        ["questionaire_repo", "value", "driver_details", "value"],
-                        new_driver_count
-                    )
-                    
-                    # Keep additional_drivers as None (don't store false)
-                    form.context.data["questionaire_repo"]["value"]["additional_drivers"]["value"] = None
-                    
-                    update_assigned_driver_enums(form.context.data)
-                    log_to_file(f"Added one more driver (total: {new_driver_count}) - additional_drivers kept as None")
-                    
-                elif value is True:
-                    # Set additional_drivers to true (no more drivers wanted)
-                    form.context.data["questionaire_repo"]["value"]["additional_drivers"]["value"] = True
-                    log_to_file("Set additional_drivers to True - no more drivers will be added")
-                    
-            except Exception as e:
-                log_to_file(f"Error handling additional_drivers: {str(e)}")
-
         # Handle additional_co_insured boolean field  
         elif json_path.endswith("questionaire_repo.value.additional_co_insured.value"):
             try:
@@ -1388,15 +1398,15 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
                         new_co_insured_count
                     )
                 
-                    current_drivers = len(form.context.data["questionaire_repo"]["value"]["driver_details"]["value"])
-                    required_drivers = current_drivers + 1
-                    if current_drivers < required_drivers:
+                    current_detached = len(form.context.data["questionaire_repo"]["value"]["detached_details"]["value"])
+                    required_detached = current_detached + 1
+                    if current_detached < required_detached:
                         resize_list_with_ordinal(
                             form.context.data,
-                            ["questionaire_repo", "value", "driver_details", "value"],
-                            required_drivers
+                            ["questionaire_repo", "value", "detached_details", "value"],
+                            required_detached
                         )
-                        form.context.data["questionaire_repo"]["value"]["number_of_drivers"]["value"] = required_drivers
+                        form.context.data["questionaire_repo"]["value"]["number_of_detached"]["value"] = required_detached
                     
                     # Keep additional_co_insured as None (don't store false)
                     form.context.data["questionaire_repo"]["value"]["additional_co_insured"]["value"] = None
@@ -1447,6 +1457,70 @@ async def update_field(form: RunContextWrapper[Form], path: str, operation: str,
         elif "lead_repo.value.marital_status.value" in json_path:
             if value.lower() == "single":
                 form.context.data["questionaire_repo"]["value"]["co_insured"]["value"][0]["value"]["relationship"]["enums"].pop("Spouse")
+
+        # Handle additional_detached_structures boolean field
+        elif json_path.endswith("questionaire_repo.value.additional_detached_structures.value"):
+            try:
+                if value is False:
+                    # Add one more detached structure but don't store the false value
+                    current_detached = form.context.data["questionaire_repo"]["value"]["number_of_detached"]["value"] or 1
+                    new_detached_count = current_detached + 1
+                    
+                    # Update number_of_detached
+                    form.context.data["questionaire_repo"]["value"]["number_of_detached"]["value"] = new_detached_count
+                    
+                    # Resize detached list
+                    resize_list_with_ordinal(
+                        form.context.data,
+                        ["questionaire_repo", "value", "detached_details", "value"],
+                        new_detached_count
+                    )
+                    
+                    # Keep additional_detached_structures as None (don't store false)
+                    form.context.data["questionaire_repo"]["value"]["additional_detached_structures"]["value"] = None
+                    
+                    update_assigned_driver_enums(form.context.data)
+                    log_to_file(f"Added one more detached structure (total: {new_detached_count}) - additional_detached_structures kept as None")
+                    
+                elif value is True:
+                    # Set additional_detached_structures to true (no more detached structures wanted)
+                    form.context.data["questionaire_repo"]["value"]["additional_detached_structures"]["value"] = True
+                    log_to_file("Set additional_detached_structures to True - no more detached structures will be added")
+                    
+            except Exception as e:
+                log_to_file(f"Error handling additional_detached_structures: {str(e)}")
+
+        # Handle additional_animals boolean field
+        elif json_path.endswith("questionaire_repo.value.additional_animals.value"):
+            try:
+                if value is False:
+                    # Add one more animal but don't store the false value
+                    current_animals = form.context.data["questionaire_repo"]["value"]["number_of_animals"]["value"] or 0
+                    new_animal_count = current_animals + 1
+                    
+                    # Update number_of_animals
+                    form.context.data["questionaire_repo"]["value"]["number_of_animals"]["value"] = new_animal_count
+                    
+                    # Resize animal list
+                    resize_list_with_ordinal(
+                        form.context.data,
+                        ["questionaire_repo", "value", "animal_details", "value"],
+                        new_animal_count
+                    )
+                    
+                    # Keep additional_animals as None (don't store false)
+                    form.context.data["questionaire_repo"]["value"]["additional_animals"]["value"] = None
+                    
+                    update_assigned_driver_enums(form.context.data)
+                    log_to_file(f"Added one more animal (total: {new_animal_count}) - additional_animals kept as None")
+                    
+                elif value is True:
+                    # Set additional_animals to true (no more animals wanted)
+                    form.context.data["questionaire_repo"]["value"]["additional_animals"]["value"] = True
+                    log_to_file("Set additional_animals to True - no more animals will be added")
+                    
+            except Exception as e:
+                log_to_file(f"Error handling additional_animals: {str(e)}")
 
     except Exception as e:
         log_to_file(f"error in multiplying fields: {path} {str(e)}")
@@ -2116,13 +2190,17 @@ questionaire_repo = {
         "bathroom_quality":        None,
         "garage_type":             None,
         "garage_stalls":           None,
+        "number_of_detached_structures":      None,
         "detached_structure_types":[],
+        "additional_structures": None,
         "number_of_occupants":     None,
     },
 
     "risk_details": {
         "has_animals":              None,
+        "number_of_animals":        None,
         "animals":                  [],
+        "additional_animals":       None,
         "other_animals":            None,
         "has_trampoline":           None,
         "has_pool":                 None,
@@ -2142,8 +2220,9 @@ questionaire_repo = {
     "updated_at":                 None,
 }
 
-# normalise(form)
+normalise(form)
 data = Form(data=form,history=[],language_processor_response=[],lead_repo=lead_repo,questionaire_repo=questionaire_repo,input_tokens=0,output_tokens=0,cached_tokens=0)
+print(form)
 
 async def main():
     print("Assistant:", "Hi! To get started with your insurance information, could you please provide Your Full Name.")

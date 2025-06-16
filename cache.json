@@ -1,0 +1,50 @@
+{
+    "059e29850c43c9821722629e84fdb66c": {
+        "_id": "1cbc41b9-c599-4750-bdfd-cd4efaa745ae",
+        "hash_id": "059e29850c43c9821722629e84fdb66c",
+        "update_commands": [
+            {
+                "path": "lead_repo.value.insured.value.first_name.value",
+                "operation": "update",
+                "value": "vamit"
+            },
+            {
+                "path": "lead_repo.value.insured.value.middle_name.value",
+                "operation": "update",
+                "value": ""
+            },
+            {
+                "path": "lead_repo.value.insured.value.last_name.value",
+                "operation": "update",
+                "value": "damor"
+            }
+        ],
+        "reply": {
+            "message": "Thank you, Vamit Damor. Could you please provide the following information:\n- Insured date of birth (dob).\nPlease note, the date of birth helps us tailor the best insurance options for you.",
+            "enums": null,
+            "suggestion_values": null
+        },
+        "created_at": "2025-06-16T15:47:37.192098"
+    },
+    "11874d6b6495a07c1b5182897a5838f8": {
+        "_id": "0d8b7d66-1cb7-429c-adc8-3081aa01c4de",
+        "hash_id": "11874d6b6495a07c1b5182897a5838f8",
+        "update_commands": [
+            {
+                "path": "lead_repo.value.date_of_birth.value",
+                "operation": "update",
+                "value": "31-05-2003"
+            }
+        ],
+        "reply": {
+            "message": "Thank you for providing your date of birth, Vamit Damor. To proceed, could you please tell me your *Insured gender*? Here are the options you can choose from:\n- Male\n- Female\n- Other\nPlease let me know which one applies to you.",
+            "enums": [
+                "Male",
+                "Female",
+                "Other"
+            ],
+            "suggestion_values": null
+        },
+        "created_at": "2025-06-16T16:13:38.130600"
+    }
+}

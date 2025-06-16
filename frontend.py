@@ -2,7 +2,7 @@ import streamlit as st
 import asyncio
 import json
 import time
-from main_copy import  language_processor, json_agent, validation_agent, reply_agent, next_field, form, get_live_logs, validate_date, Form
+from main import  language_processor, json_agent, validation_agent, reply_agent, next_field, form, get_live_logs, validate_date, Form,get_from_cache,save_to_cache
 
 st.set_page_config(page_title="Insurance Form Assistant", layout="wide")
 
@@ -221,6 +221,7 @@ if not st.session_state.app_started:
                 data=session_form_data, 
                 history=[],
                 language_processor_response=[],
+                cache={},
                 input_tokens=0,
                 output_tokens=0,
                 cached_tokens=0,
@@ -1314,12 +1315,13 @@ def process_step_by_step():
                 st.session_state.chat_history.append({
                     "role": "assistant", 
                     "content": processed_message['message'],
-                    "enums": None,
-                    "suggestion_values": None
+                    "enums": processed_message['enums'],
+                    "suggestion_values": processed_message['suggestion_values']
                 })
                 st.session_state.is_typing = False
                 st.session_state.processing_step = 0
-                
+
+            st.session_state.form_snapshot = json.loads(json.dumps(st.session_state.session_data.data))
             st.session_state.processed_data = processed_message
             st.session_state.processing_message = "⚙️ Updating form..."
             st.session_state.processing_step = 3
@@ -1412,6 +1414,11 @@ def process_step_by_step():
                 "enums": enums,
                 "suggestion_values": suggestion_values
             })
+
+            if not get_from_cache(st.session_state.session_data.cache['hash_id']):
+                save_to_cache(st.session_state.session_data.cache)
+
+            st.session_state.session_data.cache = {}
             
             # Update form snapshot and trigger next field focus
             st.session_state.form_snapshot = json.loads(json.dumps(st.session_state.session_data.data))
@@ -1429,6 +1436,8 @@ def process_step_by_step():
             st.session_state.is_typing = False
             st.session_state.processing_step = 0
             st.rerun()
+        
+
 
 
 
@@ -1823,7 +1832,7 @@ if user_input:
 
 # Handle assistant response with detailed processing
 if st.session_state.is_typing:
-    process_step_by_step() 
+    process_step_by_step()
 
 # --- LOG VIEWER SECTION ---
 from main import get_live_logs
