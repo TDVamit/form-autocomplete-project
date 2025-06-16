@@ -264,783 +264,124 @@ form = {
     }
   },
   "questionaire_repo": {
-    "type": "object",
-    "description": "Questionnaire repo",
-    "is_required": False,
-    "value": {
-      "license_status": {
-          "type": "enum",
-          "description": "License status",
-          "is_required": False,
-          "value": None,
-          "enum": ["Valid", "Suspended", "Expired"]
-        },
-        "licensed_state": {
-          "type": "string",
-          "description": "licensed State",
-          "is_required": False,
-          "value": None
-        },
-        "license_number": {
-          "type": "string",
-          "description": "licensed number",
-          "is_required": False,
-          "value": None
-        },
-        "licensed_age": {
-          "type": "integer",
-          "description": "licensed age",
-          "is_required": False,
-          "value": None
-        },
-        "rated": {
-          "type": "boolean",
-          "description": "insured rated?",
-          "is_required": False,
-          "value": None
-        },
-        "sr22_required": {
-          "type": "boolean",
-          "description": "SR‑22 required?",
-          "is_required": False,
-          "value": None
-        },
-        "drive_for_rideshare": {
-          "type": "boolean",
-          "description": "uses rideshare?",
-          "is_required": False,
-          "value": None
-        },
-        "drive_for_delivery": {
-          "type": "boolean",
-          "description": "uses delivery?",
-          "is_required": False,
-          "value": None
-        },
-        "driver_discounts": {
-          "type": "string",
-          "description": "Any driver discounts?",
-          "is_required": False,
-          "value": None
-        },
-        "good_student_discount": {
-          "type": "boolean",
-          "description": "Good student discount?",
-          "is_required": False,
-          "value": None
-        },
-        "mature_driver_discount": {
-          "type": "boolean",
-          "description": "Mature driver discount?",
-          "is_required": False,
-          "value": None
-        },
-        "safe_driver_discount": {
-          "type": "boolean",
-          "description": "Safe driver discount?",
-          "is_required": False,
-          "value": None
-        },
-      "number_of_co_insured":{
-        "type":"integer",
-        "description":"Co-insured count",
-        "is_required":False,
-        "value":None
-        },
+      "type": "object",
+      "description": "Questionnaire repo",
+      "is_required": False,
+      "value": {
       "co_insured": {
-        "type": "list",
-        "description": "Co-insured list",
-        "is_required": False,
-        "value": [
-          {
-            "type": "object",
-            "description": "Co-insured one Details",
-            "is_required": False,
-            "value": {
-              "name": {
-                "type": "object",
-                "description": "Co‑insured one name",
-                "ask_collected":True,
-                "is_required": False,
-                "value": {
-                  "first_name": {
-                    "type": "string",
-                    "description": "co-insured one first name",
-                    "is_required": False,
-                    "value": None
-                  },
-                  "middle_name": {
-                    "type": "string",
-                    "description": "co-insured one middle name",
-                    "is_required": False,
-                    "value": None
-                  },
-                  "last_name": {
-                    "type": "string",
-                    "description": "co-insured one last name",
-                    "is_required": False,
-                    "value": None
+          "type": "list",
+          "description": "List of co‑insured entries",
+          "is_required": False,
+          "value": [
+              {
+                  "type": "object",
+                  "description": "Co‑insured details",
+                  "is_required": False,
+                  "value": {
+                      "name": {
+                          "type": "object",
+                          "description": "Name object",
+                          "ask_collected": True,
+                          "is_required": False,
+                          "value": {
+                              "first_name": {"type": "string", "description": "First name", "is_required": False, "value": None},
+                              "middle_name":{"type":"string","description":"Middle name","is_required":False,"value":None},
+                              "last_name": {"type":"string","description":"Last name","is_required":False,"value":None},
+                          }
+                      },
+                      "date_of_birth":       {"type":"date","description":"DOB (YYYY-MM-DD)","is_required":False,"value":None},
+                      "gender":              {"type":"enum","description":"Gender","is_required":False,"value":None,"enum":["Male","Female","Other"]},
+                      "relationship":        {"type":"enum","description":"Relation to insured","is_required":False,"value":None,"enum":["Spouse","Child","Parent","Other"]},
+                      "marital_status":      {"type":"enum","description":"Marital status","is_required":False,"value":None,"enum":["Single","Married","Divorced","Widowed","Domestic Partner"]},
+                      "occupation":          {"type":"string","description":"Occupation","is_required":False,"value":None},
+                      "education":           {"type":"enum","description":"Education level","is_required":False,"value":None,"enum":["High School","Some College","Associates Degree","Bachelors","Masters","PhD"]},
+                      "license_status":      {"type":"enum","description":"License status","is_required":False,"value":None,"enum":["Valid","Suspended","Expired"]},
+                      "licensed_state":      {"type":"string","description":"Licensed state","is_required":False,"value":None},
+                      "license_number":      {"type":"string","description":"License number","is_required":False,"value":None},
+                      "licensed_age":        {"type":"integer","description":"Licensed age","is_required":False,"value":None},
+                      "rated":               {"type":"boolean","description":"Rated driver?","is_required":False,"value":None},
+                      "sr22_required":       {"type":"boolean","description":"SR‑22 required?","is_required":False,"value":None},
+                      "drive_for_rideshare": {"type":"boolean","description":"Drives rideshare?","is_required":False,"value":None},
+                      "drive_for_delivery":  {"type":"boolean","description":"Drives delivery?","is_required":False,"value":None},
+                      "driver_discounts":    {"type":"string","description":"Driver discounts","is_required":False,"value":None},
+                      "good_student_discount":{"type":"boolean","description":"Good student discount?","is_required":False,"value":None},
+                      "mature_driver_discount":{"type":"boolean","description":"Mature driver discount?","is_required":False,"value":None},
+                      "safe_driver_discount":{"type":"boolean","description":"Safe driver discount?","is_required":False,"value":None},
                   }
-                }
-              },
-              "date_of_birth": {
-                "type": "date",
-                "description": "co-insured one dob",
-                "is_required": False,
-                "value": None
-              },
-              "gender": {
-                "type": "enum",
-                "description": "co-insured one gender",
-                "is_required": False,
-                "value": None,
-                "enum": ["Male", "Female", "Other"]
-              },
-              "relationship": {
-                "type": "enum",
-                "description": "Co-insured one relation to insured",
-                "is_required": False,
-                "value": None,
-                "enum": ["Spouse", "Child", "Parent", "Other"]
-              },
-              "marital_status": {
-                "type": "enum",
-                "description": "co-insured one marital status",
-                "is_required": False,
-                "value": None,
-                "enum": ["Single", "Married", "Divorced", "Widowed", "Domestic Partner"]
-              },
-              "occupation": {
-                "type": "string",
-                "description": "co-insured one occupation",
-                "is_required": False,
-                "value": None
-              },
-              "education": {
-                "type": "enum",
-                "description": "co-insured one education",
-                "is_required": False,
-                "value": None,
-                "enum": ["High School", "Some College", "Associates Degree", "Bachelors", "Masters", "PhD"]
-              },
-              "license_status": {
-                "type": "enum",
-                "description": "co-insured one license status",
-                "is_required": False,
-                "value": None,
-                "enum": ["Valid", "Suspended", "Expired"]
-              },
-              "licensed_state": {
-                "type": "string",
-                "description": "co-insured one licensed state",
-                "is_required": False,
-                "value": None
-              },
-              "license_number": {
-                "type": "string",
-                "description": "co-insured one license number",
-                "is_required": False,
-                "value": None
-              },
-              "licensed_age": {
-                "type": "integer",
-                "description": "co-insured one licensed age",
-                "is_required": False,
-                "value": None
-              },
-              "rated": {
-                "type": "boolean",
-                "description": "co-insured one rated?",
-                "is_required": False,
-                "value": None
-              },
-              "sr22_required": {
-                "type": "boolean",
-                "description": "co-insured one SR‑22 required?",
-                "is_required": False,
-                "value": None
-              },
-              "drive_for_rideshare": {
-                "type": "boolean",
-                "description": "co-insured one uses rideshare?",
-                "is_required": False,
-                "value": None
-              },
-              "drive_for_delivery": {
-                "type": "boolean",
-                "description": "co-insured one uses delivery?",
-                "is_required": False,
-                "value": None
-              },
-              "driver_discounts": {
-                "type": "string",
-                "description": "co-insured one discounts",
-                "is_required": False,
-                "value": None
-              },
-              "good_student_discount": {
-                "type": "boolean",
-                "description": "co-insured one good student discount?",
-                "is_required": False,
-                "value": None
-              },
-              "mature_driver_discount": {
-                "type": "boolean",
-                "description": "co-insured one mature driver discount?",
-                "is_required": False,
-                "value": None
-              },
-              "safe_driver_discount": {
-                "type": "boolean",
-                "description": "co-insured one safe driver discount?",
-                "is_required": False,
-                "value": None
               }
-            }
-          }
-        ]
-      },
-      "additional_co_insured":{
-        "type":"boolean",
-        "description":"Skip more co-insured?(ask user to add more?)",
-        "is_required":False,
-        "value":None
+          ]
       },
       "policy_details": {
-        "type": "object",
-        "description": "Current/prior policy details",
-        "is_required": True,
-        "value": {
-          "effective_date": {
-            "type": "string",
-            "description": "Policy start date",
-            "is_required": True,
-            "value": None
-          },
-          "current_carrier": {
-            "type": "string",
-            "description": "Current carrier name",
-            "is_required": False,
-            "value": None
-          },
-          "current_carrier_premium": {
-            "type": "integer",
-            "description": "Current carrier premium",
-            "is_required": True,
-            "value": None
-          },
-          "years_with_prior_carrier": {
-            "type": "integer",
-            "description": "Years with the prior carrier",
-            "is_required": False,
-            "value": None
-          },
-          "years_continuous_coverage": {
-            "type": "integer",
-            "description": "continuous coverage years",
-            "is_required": False,
-            "value": None
-          },
-          "prior_insurance_liability_limit": {
-            "type": "enum",
-            "description": "prior policy liability limit",
-            "is_required": False,
-            "value": None,
-            "enum": ["25/50", "50/100", "100/300", "250/500", "300/500", "500/500"]
-          },
-          "policy_term_length": {
-            "type": "enum",
-            "description": "Previous policy duration",
-            "is_required": False,
-            "value": None,
-            "enum": ["6 months", "12 months"]
-          },
-          "payment_frequency": {
-            "type": "enum",
-            "description": "payment frequency",
-            "is_required": False,
-            "value": None,
-            "enum": ["Monthly", "Annually"]
+          "type": "object",
+          "description": "Policy details",
+          "is_required": False,
+          "value": {
+              "effective_date":       {"type":"string","description":"YYYY‑MM‑DD","is_required":False,"value":None},
+              "use":                  {"type":"enum","description":"UseType","is_required":False,"value":None},
+              "policy_form":          {"type":"enum","description":"PolicyForm","is_required":False,"value":None},
+              "protection_class":     {"type":"object","description":"CoverageDetails","is_required":False,"value":{}},
+              "prior_carrier":        {"type":"string","description":"Prior carrier","is_required":False,"value":None},
+              "prior_carrier_premium":{"type":"number","description":"Prior carrier premium","is_required":False,"value":None},
           }
-        }
       },
-      "coverage_details": {
-        "type": "object",
-        "description": "Coverage limits",
-        "is_required": False,
-        "value": {
-          "bodily_injury": {
-            "type": "enum",
-            "description": "Bodily injury limit",
-            "is_required": False,
-            "value": None,
-            "enum": ["25/50", "50/100", "100/300", "250/500", "300/500", "500/500"]
-          },
-          "property_damage": {
-            "type": "enum",
-            "description": "Property damage limit",
-            "is_required": False,
-            "value": None,
-            "enum": ["25000", "50000", "100000", "300000", "500000"]
-          },
-          "personal_injury_protection": {
-            "type": "enum",
-            "description": "PIP limit",
-            "is_required": False,
-            "value": None,
-            "enum": ["2500", "5000", "10000"]
-          },
-          "uninsured_motorist": {
-            "type": "enum",
-            "description": "UMBI limit",
-            "is_required": False,
-            "value": None,
-            "enum": ["25/50", "50/100", "100/300", "250/500", "300/500", "500500"]
-          },
-          "uninsured_motorist_pd": {
-            "type": "enum",
-            "description": "UMPD limit",
-            "is_required": False,
-            "value": None,
-            "enum": ["10000", "25000", "50000"]
-          },
-          "underinsured_motorist": {
-            "type": "enum",
-            "description": "UIMBI limit",
-            "is_required": False,
-            "value": None,
-            "enum": ["25/50", "50/100", "100/300", "250/500", "300/500", "500500"]
-          },
-          "medical_payments": {
-            "type": "enum",
-            "description": "MedPay limit",
-            "is_required": False,
-            "value": None,
-            "enum": ["500", "1000", "2000", "5000", "10000"]
+      "property_details": {
+          "type": "object",
+          "description": "Property details",
+          "is_required": False,
+          "value": {
+              "year_built":              {"type":"integer","description":"Year built","is_required":False,"value":None},
+              "effective_year_built":    {"type":"integer","description":"Effective year built","is_required":False,"value":None},
+              "residence_type":          {"type":"enum","description":"ResidenceType","is_required":False,"value":None},
+              "square_footage":          {"type":"integer","description":"Square footage","is_required":False,"value":None},
+              "roof_type_shape":         {"type":"string","description":"Roof type/shape","is_required":False,"value":None},
+              "electrical_panel_type":   {"type":"string","description":"Electrical panel","is_required":False,"value":None},
+              "foundation":              {"type":"enum","description":"FoundationType","is_required":False,"value":None},
+              "floors_stories":          {"type":"integer","description":"Floors/stories","is_required":False,"value":None},
+              "exterior":                {"type":"string","description":"Exterior","is_required":False,"value":None},
+              "framing":                 {"type":"string","description":"Framing","is_required":False,"value":None},
+              "construction_style":      {"type":"string","description":"Construction style","is_required":False,"value":None},
+              "construction_quality":    {"type":"string","description":"Construction quality","is_required":False,"value":None},
+              "kitchen_quality":         {"type":"string","description":"Kitchen quality","is_required":False,"value":None},
+              "bedrooms":                {"type":"integer","description":"Bedrooms","is_required":False,"value":None},
+              "full_bathrooms":          {"type":"integer","description":"Full bathrooms","is_required":False,"value":None},
+              "half_bathrooms":          {"type":"integer","description":"Half bathrooms","is_required":False,"value":None},
+              "bathroom_quality":        {"type":"string","description":"Bathroom quality","is_required":False,"value":None},
+              "garage_type":             {"type":"enum","description":"GarageType","is_required":False,"value":None},
+              "garage_stalls":           {"type":"integer","description":"Garage stalls","is_required":False,"value":None},
+              "detached_structure_types":{"type":"list","description":"Detached structures","is_required":False,"value":[]},
+              "number_of_occupants":     {"type":"integer","description":"Number of occupants","is_required":False,"value":None},
           }
-        }
       },
-      "number_of_drivers": {
-        "type": "integer",
-        "description": "Additional driver count",
-        "is_required": False,
-        "value": None
-      },
-      "driver_details": {
-        "type": "list",
-        "description": "Additional driver list",
-        "is_required": False,
-        "value": [
-          {
-            "type": "object",
-            "description": "driver one details",
-            "is_required": False,
-            "value": {
-              "name": {
-                "type": "object",
-                "description": "driver one name",
-                "ask_collected":True,
-                "is_required": False,
-                "value": {
-                  "first_name": {
-                    "type": "string",
-                    "description": "driver one first name",
-                    "is_required": False,
-                    "value": None
-                  },
-                  "middle_name": {
-                    "type": "string",
-                    "description": "driver one middle name",
-                    "is_required": False,
-                    "value": None
-                  },
-                  "last_name": {
-                    "type": "string",
-                    "description": "driver one last name",
-                    "is_required": False,
-                    "value": None
-                  }
-                }
-              },
-              "date_of_birth": {
-                "type": "date",
-                "description": "driver one dob",
-                "is_required": False,
-                "value": None
-              },
-              "gender": {
-                "type": "enum",
-                "description": "driver one gender",
-                "is_required": False,
-                "value": None,
-                "enum": ["Male", "Female", "Other"]
-              },
-              "relationship": {
-                "type": "enum",
-                "description": "driver one relation to policyholder",
-                "is_required": False,
-                "value": "Self",
-                "enum": ["Spouse", "Child", "Parent", "Self", "Other"]
-              },
-              "marital_status": {
-                "type": "enum",
-                "description": "driver one marital status",
-                "is_required": False,
-                "value": None,
-                "enum": ["Single", "Married", "Divorced", "Widowed", "Domestic Partner"]
-              },
-              "occupation": {
-                "type": "string",
-                "description": "driver one occupation",
-                "is_required": False,
-                "value": None
-              },
-              "education": {
-                "type": "enum",
-                "description": "driver one education",
-                "is_required": False,
-                "value": None,
-                "enum": ["High School", "Some College", "Associates Degree", "Bachelors", "Masters", "PhD"]
-              },
-              "license_status": {
-                "type": "enum",
-                "description": "driver one license status",
-                "is_required": False,
-                "value": None,
-                "enum": ["Valid", "Suspended", "Expired"]
-              },
-              "licensed_state": {
-                "type": "string",
-                "description": "driver one licensed state",
-                "is_required": False,
-                "value": None
-              },
-              "license_number": {
-                "type": "string",
-                "description": "driver one license number",
-                "is_required": False,
-                "value": None
-              },
-              "licensed_age": {
-                "type": "integer",
-                "description": "driver one licensed age",
-                "is_required": False,
-                "value": None
-              },
-              "rated": {
-                "type": "boolean",
-                "description": "driver one rated?",
-                "is_required": False,
-                "value": None
-              },
-              "sr22_required": {
-                "type": "boolean",
-                "description": "driver one SR‑22 required?",
-                "is_required": False,
-                "value": None
-              },
-              "drive_for_rideshare": {
-                "type": "boolean",
-                "description": "driver one uses rideshare?",
-                "is_required": False,
-                "value": None
-              },
-              "drive_for_delivery": {
-                "type": "boolean",
-                "description": "driver one uses delivery?",
-                "is_required": False,
-                "value": None
-              },
-              "driver_discounts": {
-                "type": "string",
-                "description": "driver one discounts",
-                "is_required": False,
-                "value": None
-              },
-              "good_student_discount": {
-                "type": "boolean",
-                "description": "driver one good student discount?",
-                "is_required": False,
-                "value": None
-              },
-              "mature_driver_discount": {
-                "type": "boolean",
-                "description": "driver one mature driver discount?",
-                "is_required": False,
-                "value": None
-              },
-              "safe_driver_discount": {
-                "type": "boolean",
-                "description": "driver one safe driver discount?",
-                "is_required": False,
-                "value": None
-              }
-            }
+      "risk_details": {
+          "type": "object",
+          "description": "Risk details",
+          "is_required": False,
+          "value": {
+              "has_animals":              {"type":"boolean","description":"Has animals?","is_required":False,"value":None},
+              "animals":                  {"type":"list","description":"Animal types","is_required":False,"value":[]},
+              "other_animals":            {"type":"string","description":"Othser animals","is_required":False,"value":None},
+              "has_trampoline":           {"type":"boolean","description":"Has trampoline?","is_required":False,"value":None},
+              "has_pool":                 {"type":"boolean","description":"Has pool?","is_required":False,"value":None},
+              "pool_has_protective_covering":{"type":"boolean","description":"Pool covering?","is_required":False,"value":None},
+              "ni_owns_other_properties": {"type":"boolean","description":"Owns other properties?","is_required":False,"value":None},
           }
-        ]
       },
-      "additional_drivers":{
-        "type":"boolean",
-        "description":"Skip more drivers?(ask user to add more?)",
-        "is_required":False,
-        "value":None
-      },
-      "number_of_vehicles": {
-        "type": "integer",
-        "description": "Vehicle count",
-        "is_required": False,
-        "value": None
-      },
-      "vehicle_details": {
-        "type": "list",
-        "description": "vehicles list",
-        "is_required": False,
-        "value": [
-          {
-            "type": "object",
-            "description": "vehicle one details",
-            "is_required": False,
-            "value": {
-              "vin": {
-                "type": "string",
-                "description": "Vehicle 1 VIN",
-                "is_required": False,
-                "value": None
-              },
-              "make": {
-                "type": "string",
-                "description": "Vehicle one make",
-                "is_required": False,
-                "value": None
-              },
-              "model": {
-                "type": "string",
-                "description": "Vehicle one model",
-                "is_required": False,
-                "value": None
-              },
-              "year": {
-                "type": "integer",
-                "description": "Vehicle one year",
-                "is_required": False,
-                "value": None
-              },
-              "assigned_driver": {
-                "type": "enum",
-                "description": "Vehicle 1 driver name",
-                "is_required": False,
-                "value": None,
-                "enum": []
-              },
-              "garaged_state": {
-                "type": "string",
-                "description": "vehicle one garaged state",
-                "is_required": False,
-                "value": None
-              },
-              "garaging_address": {
-                "type": "object",
-                "description": "vehicle one garaging address",
-                "ask_collected":True,
-                "is_required": False,
-                "value": {
-                  "street_address": {
-                    "type": "string",
-                    "description": "vehicle one garaging street",
-                    "is_required": False,
-                    "value": None
-                  },
-                  "city": {
-                    "type": "string",
-                    "description": "vehicle one garaging city",
-                    "is_required": False,
-                    "value": None
-                  },
-                  "state": {
-                    "type": "string",
-                    "description": "vehicle one garaging state",
-                    "is_required": False,
-                    "value": None
-                  },
-                  "zip_code": {
-                    "type": "string",
-                    "description": "vehicle one garaging zip code",
-                    "is_required": False,
-                    "value": None
-                  }
-                }
-              },
-              "annual_miles": {
-                "type": "integer",
-                "description": "vehicle one annual miles",
-                "is_required": False,
-                "value": None
-              },
-              "vehicle_usage": {
-                "type": "enum",
-                "description": "Vehicle one usage type",
-                "is_required": False,
-                "value": None,
-                "enum": ["Pleasure", "Commute", "Business", "Rideshare"]
-              },
-              "financed_vehicle": {
-                "type": "boolean",
-                "description": "vehicle one financed?",
-                "is_required": False,
-                "value": None
-              },
-              "coverage_details": {
-                "type": "object",
-                "description": "vehicle one coverages",
-                "is_required": False,
-                "value": {
-                  "comprehensive_deductible": {
-                    "type": "integer",
-                    "description": "vehicle one comprehensive deductible",
-                    "is_required": False,
-                    "value": None
-                  },
-                  "collision_deductible": {
-                    "type": "integer",
-                    "description": "vehicle one collision deductible",
-                    "is_required": False,
-                    "value": None
-                  },
-                  "towing_coverage": {
-                    "type": "object",
-                    "description": "vehicle one towing coverage",
-                    "is_required": False,
-                    "value": {
-                      "coverage_limit": {
-                        "type": "integer",
-                        "description": "vehicle one towing coverage limit",
-                        "is_required": False,
-                        "value": None
-                      }
-                    }
-                  },
-                  "rental_reimbursement": {
-                    "type": "object",
-                    "description": "vehicle one rental reimbursement",
-                    "is_required": False,
-                    "value": {
-                      "daily_limit": {
-                        "type": "integer",
-                        "description": "vehicle one daily limit",
-                        "is_required": False,
-                        "value": None
-                      },
-                      "total_limit": {
-                        "type": "integer",
-                        "description": "vehicle one total limit",
-                        "is_required": False,
-                        "value": None
-                      }
-                    }
-                  },
-                  "full_glass_coverage": {
-                    "type": "boolean",
-                    "description": "vehicle one full glass coverage?",
-                    "is_required": False,
-                    "value": None
-                  }
-                }
-              },
-              "rented_on_turo": {
-                "type": "boolean",
-                "description": "vehicle one rented on Turo?",
-                "is_required": False,
-                "value": None
-              },
-              "ownership_type": {
-                "type": "enum",
-                "description": "vehicle one ownership type",
-                "is_required": False,
-                "value": None,
-                "enum": ["Owned", "Leased", "Financed"]
-              },
-              "anti_theft_installed": {
-                "type": "boolean",
-                "description": "vehicle one anti-theft device installed?",
-                "is_required": False,
-                "value": None
-              }
-            }
+      "mortgage_details": {
+          "type":"object",
+          "description":"Mortgage details",
+          "is_required":False,
+          "value": {
+              "mortgage_company": {"type":"string","description":"Company","is_required":False,"value":None},
+              "loan_number":      {"type":"string","description":"Loan #","is_required":False,"value":None},
           }
-        ]
       },
-      "additional_vehicles":{
-        "type":"boolean",
-        "description":"Do not add more vehicles (ask user if they want to add more vehicles)",
-        "is_required":False,
-        "value":None
-      }
-    }
+      "prior_claims_last_5_years": {
+          "type":"boolean","description":"Claims in last 5 yrs?","is_required":False,"value":None
+      },
+  }
   }
 }
 
-vehicle_details = [
-        {
-            "vin": None,
-            "make": None,
-            "model": None,
-            "year": None,
-            "assigned_driver": None,
-            "garaged_state": None,
-            "garaging_address": {
-                "street_address": None,
-                "city": None,
-                "state": None,
-                "zip_code": None
-            },
-            "annual_miles": None,
-            "vehicle_usage": None,
-            "financed_vehicle": None,
-            "coverage_details": {
-                "comprehensive_deductible": None,
-                "collision_deductible": None,
-                "towing_coverage": {
-                    "coverage_limit": None
-                },
-                "rental_reimbursement": {
-                    "daily_limit": None,
-                    "total_limit": None
-                },
-                "full_glass_coverage": None
-            },
-            "rented_on_turo": None,
-            "ownership_type": None,
-            "anti_theft_installed": None
-        }
-    ]
-
-driver_details = [
-        {
-            "name": {
-                "first_name": None,
-                "middle_name": None,
-                "last_name": None
-            },
-            "date_of_birth": None,
-            "gender": None,
-            "relationship": None,
-            "marital_status": None,
-            "occupation": None,
-            "education": None,
-            "license_status": None,
-            "licensed_state": None,
-            "license_number": None,
-            "licensed_age": None,
-            "rated": None,
-            "sr22_required": None,
-            "drive_for_rideshare": None,
-            "drive_for_delivery": None,
-            "driver_discounts": None,
-            "good_student_discount": None,
-            "mature_driver_discount": None,
-            "safe_driver_discount": None
-        }
-    ]
 
 co_insured = [
         {
@@ -1071,89 +412,130 @@ co_insured = [
     ]
 
 field_mapping = {
-    "lead_repo.value.insured.value.first_name.value":      "lead_repo.insured.first_name",
-    "lead_repo.value.insured.value.middle_name.value":     "lead_repo.insured.middle_name",
-    "lead_repo.value.insured.value.last_name.value":       "lead_repo.insured.last_name",
-    "lead_repo.value.date_of_birth.value":                 "lead_repo.date_of_birth.$date",
-    "lead_repo.value.gender.value":                        "lead_repo.gender",
-    "lead_repo.value.marital_status.value":                "lead_repo.marital_status",
-    "lead_repo.value.email.value":                         "lead_repo.email",
-    "lead_repo.value.social_security_number.value":        "lead_repo.social_security_number",
-    "lead_repo.value.occupation.value":                    "lead_repo.occupation",
-    "lead_repo.value.education.value":                     "lead_repo.education",
-    "lead_repo.value.phone_number.value.country_code.value":"lead_repo.phone_number.country_code",
-    "lead_repo.value.phone_number.value.number.value":     "lead_repo.phone_number.number",
-    "lead_repo.value.can_text.value":                      "lead_repo.can_text",
-    "lead_repo.value.contact_preference.value":            "lead_repo.contact_preference",
-    "lead_repo.value.address_detail.value.insured_address.value.street_address.value":"lead_repo.address_detail.insured_address.street_address",
-    "lead_repo.value.address_detail.value.insured_address.value.city.value": "lead_repo.address_detail.insured_address.city",
+
+    "lead_repo.value.insured.value.first_name.value":           "lead_repo.insured.first_name",
+    "lead_repo.value.insured.value.middle_name.value":          "lead_repo.insured.middle_name",
+    "lead_repo.value.insured.value.last_name.value":            "lead_repo.insured.last_name",
+
+    "lead_repo.value.date_of_birth.value":                      "lead_repo.date_of_birth.$date",
+    "lead_repo.value.gender.value":                            "lead_repo.gender",
+    "lead_repo.value.marital_status.value":                    "lead_repo.marital_status",
+    "lead_repo.value.email.value":                             "lead_repo.email",
+
+    "lead_repo.value.phone_number.value.country_code.value":    "lead_repo.phone_number.country_code",
+    "lead_repo.value.phone_number.value.number.value":          "lead_repo.phone_number.number",
+
+    "lead_repo.value.can_text.value":                          "lead_repo.can_text",
+    "lead_repo.value.contact_preference.value":                "lead_repo.contact_preference",
+    "lead_repo.value.occupation.value":                        "lead_repo.occupation",
+    "lead_repo.value.education.value":                         "lead_repo.education",
+    "lead_repo.value.social_security_number.value":            "lead_repo.social_security_number",
+
+    "lead_repo.value.address_detail.value.insured_address.value.street_address.value":
+                                                               "lead_repo.address_detail.insured_address.street_address",
+    "lead_repo.value.address_detail.value.insured_address.value.city.value":
+                                                               "lead_repo.address_detail.insured_address.city",
     "lead_repo.value.address_detail.value.insured_address.value.state.value":
-                                                           "lead_repo.address_detail.insured_address.state",
+                                                               "lead_repo.address_detail.insured_address.state",
     "lead_repo.value.address_detail.value.insured_address.value.zip_code.value":
-                                                           "lead_repo.address_detail.insured_address.zip_code",
+                                                               "lead_repo.address_detail.insured_address.zip_code",
+
     "lead_repo.value.address_detail.value.mailing_address.value.street_address.value":
-                                                           "lead_repo.address_detail.mailing_address.street_address",
+                                                               "lead_repo.address_detail.mailing_address.street_address",
     "lead_repo.value.address_detail.value.mailing_address.value.city.value":
-                                                           "lead_repo.address_detail.mailing_address.city",
+                                                               "lead_repo.address_detail.mailing_address.city",
     "lead_repo.value.address_detail.value.mailing_address.value.state.value":
-                                                           "lead_repo.address_detail.mailing_address.state",
+                                                               "lead_repo.address_detail.mailing_address.state",
     "lead_repo.value.address_detail.value.mailing_address.value.zip_code.value":
-                                                           "lead_repo.address_detail.mailing_address.zip_code",
+                                                               "lead_repo.address_detail.mailing_address.zip_code",
+
     "lead_repo.value.address_detail.value.years_at_address.value":
-                                                           "lead_repo.address_detail.years_at_address",
-    "lead_repo.value.address_detail.value.county.value":    "lead_repo.address_detail.county",
-    "questionaire_repo.value.license_status.value":                       "questionaire_repo.license_status",
-    "questionaire_repo.value.licensed_state.value":                       "questionaire_repo.licensed_state",
-    "questionaire_repo.value.license_number.value":                      "questionaire_repo.license_number",
-    "questionaire_repo.value.licensed_age.value":                        "questionaire_repo.licensed_age",
-    "questionaire_repo.value.rated.value":                               "questionaire_repo.rated",
-    "questionaire_repo.value.sr22_required.value":                      "questionaire_repo.sr22_required",
-    "questionaire_repo.value.drive_for_rideshare.value":                "questionaire_repo.drive_for_rideshare",
-    "questionaire_repo.value.drive_for_delivery.value":                 "questionaire_repo.drive_for_delivery",
-    "questionaire_repo.value.driver_discounts.value":                   "questionaire_repo.driver_discounts",
-    "questionaire_repo.value.good_student_discount.value":              "questionaire_repo.good_student_discount",
-    "questionaire_repo.value.mature_driver_discount.value":             "questionaire_repo.mature_driver_discount",
-    "questionaire_repo.value.safe_driver_discount.value":               "questionaire_repo.safe_driver_discount",
-    "questionaire_repo.value.number_of_co_insured.value":               "questionaire_repo.number_of_co_insured",
-    "questionaire_repo.value.additional_co_insured.value":              "questionaire_repo.additional_co_insured",
-    "questionaire_repo.value.policy_details.value.effective_date.value":"questionaire_repo.policy_details.effective_date",
-    "questionaire_repo.value.policy_details.value.current_carrier.value":"questionaire_repo.policy_details.current_carrier",
-    "questionaire_repo.value.policy_details.value.current_carrier_premium.value":
-                                                                        "questionaire_repo.policy_details.current_carrier_premium",
-    "questionaire_repo.value.policy_details.value.years_with_prior_carrier.value":
-                                                                        "questionaire_repo.policy_details.years_with_prior_carrier",
-    "questionaire_repo.value.policy_details.value.years_continuous_coverage.value":
-                                                                        "questionaire_repo.policy_details.years_continuous_coverage",
-    "questionaire_repo.value.policy_details.value.prior_insurance_liability_limit.value":
-                                                                        "questionaire_repo.policy_details.prior_insurance_liability_limit",
-    "questionaire_repo.value.policy_details.value.policy_term_length.value":
-                                                                        "questionaire_repo.policy_details.policy_term_length",
-    "questionaire_repo.value.policy_details.value.payment_frequency.value":
-                                                                        "questionaire_repo.policy_details.payment_frequency",
-    "questionaire_repo.value.coverage_details.value.bodily_injury.value":
-                                                                        "questionaire_repo.coverage_details.bodily_injury",
-    "questionaire_repo.value.coverage_details.value.property_damage.value":
-                                                                        "questionaire_repo.coverage_details.property_damage",
-    "questionaire_repo.value.coverage_details.value.personal_injury_protection.value":
-                                                                        "questionaire_repo.coverage_details.personal_injury_protection",
-    "questionaire_repo.value.coverage_details.value.uninsured_motorist.value":
-                                                                        "questionaire_repo.coverage_details.uninsured_motorist",
-    "questionaire_repo.value.coverage_details.value.uninsured_motorist_pd.value":
-                                                                        "questionaire_repo.coverage_details.uninsured_motorist_pd",
-    "questionaire_repo.value.coverage_details.value.underinsured_motorist.value":
-                                                                        "questionaire_repo.coverage_details.underinsured_motorist",
-    "questionaire_repo.value.coverage_details.value.medical_payments.value":
-                                                                        "questionaire_repo.coverage_details.medical_payments",
-    "questionaire_repo.value.number_of_drivers.value":                   "questionaire_repo.number_of_drivers",
-    "questionaire_repo.value.additional_drivers.value":                  "questionaire_repo.additional_drivers",
-    "questionaire_repo.value.number_of_vehicles.value":                  "questionaire_repo.number_of_vehicles",
-    "questionaire_repo.value.additional_vehicles.value":                 "questionaire_repo.additional_vehicles",    
+                                                               "lead_repo.address_detail.years_at_address",
+    "lead_repo.value.address_detail.value.county.value":
+                                                               "lead_repo.address_detail.county",
+
+
+    "questionaire_repo.value.policy_details.value.effective_date.value":
+                                                               "questionaire_repo.policy_details.effective_date",
+    "questionaire_repo.value.policy_details.value.use.value":
+                                                               "questionaire_repo.policy_details.use",
+    "questionaire_repo.value.policy_details.value.policy_form.value":
+                                                               "questionaire_repo.policy_details.policy_form",
+    "questionaire_repo.value.policy_details.value.prior_carrier.value":
+                                                               "questionaire_repo.policy_details.prior_carrier",
+    "questionaire_repo.value.policy_details.value.prior_carrier_premium.value":
+                                                               "questionaire_repo.policy_details.prior_carrier_premium",
+
+    "questionaire_repo.value.property_details.value.year_built.value":
+                                                               "questionaire_repo.property_details.year_built",
+    "questionaire_repo.value.property_details.value.effective_year_built.value":
+                                                               "questionaire_repo.property_details.effective_year_built",
+    "questionaire_repo.value.property_details.value.residence_type.value":
+                                                               "questionaire_repo.property_details.residence_type",
+    "questionaire_repo.value.property_details.value.square_footage.value":
+                                                               "questionaire_repo.property_details.square_footage",
+    "questionaire_repo.value.property_details.value.roof_type_shape.value":
+                                                               "questionaire_repo.property_details.roof_type_shape",
+    "questionaire_repo.value.property_details.value.electrical_panel_type.value":
+                                                               "questionaire_repo.property_details.electrical_panel_type",
+    "questionaire_repo.value.property_details.value.foundation.value":
+                                                               "questionaire_repo.property_details.foundation",
+    "questionaire_repo.value.property_details.value.floors_stories.value":
+                                                               "questionaire_repo.property_details.floors_stories",
+    "questionaire_repo.value.property_details.value.exterior.value":
+                                                               "questionaire_repo.property_details.exterior",
+    "questionaire_repo.value.property_details.value.framing.value":
+                                                               "questionaire_repo.property_details.framing",
+    "questionaire_repo.value.property_details.value.construction_style.value":
+                                                               "questionaire_repo.property_details.construction_style",
+    "questionaire_repo.value.property_details.value.construction_quality.value":
+                                                               "questionaire_repo.property_details.construction_quality",
+    "questionaire_repo.value.property_details.value.kitchen_quality.value":
+                                                               "questionaire_repo.property_details.kitchen_quality",
+    "questionaire_repo.value.property_details.value.bedrooms.value":
+                                                               "questionaire_repo.property_details.bedrooms",
+    "questionaire_repo.value.property_details.value.full_bathrooms.value":
+                                                               "questionaire_repo.property_details.full_bathrooms",
+    "questionaire_repo.value.property_details.value.half_bathrooms.value":
+                                                               "questionaire_repo.property_details.half_bathrooms",
+    "questionaire_repo.value.property_details.value.bathroom_quality.value":
+                                                               "questionaire_repo.property_details.bathroom_quality",
+    "questionaire_repo.value.property_details.value.garage_type.value":
+                                                               "questionaire_repo.property_details.garage_type",
+    "questionaire_repo.value.property_details.value.garage_stalls.value":
+                                                               "questionaire_repo.property_details.garage_stalls",
+    "questionaire_repo.value.property_details.value.detached_structure_types.value":
+                                                               "questionaire_repo.property_details.detached_structure_types",
+    "questionaire_repo.value.property_details.value.number_of_occupants.value":
+                                                               "questionaire_repo.property_details.number_of_occupants",
+
+    "questionaire_repo.value.risk_details.value.has_animals.value":
+                                                               "questionaire_repo.risk_details.has_animals",
+    "questionaire_repo.value.risk_details.value.animals.value":
+                                                               "questionaire_repo.risk_details.animals",
+    "questionaire_repo.value.risk_details.value.other_animals.value":
+                                                               "questionaire_repo.risk_details.other_animals",
+    "questionaire_repo.value.risk_details.value.has_trampoline.value":
+                                                               "questionaire_repo.risk_details.has_trampoline",
+    "questionaire_repo.value.risk_details.value.has_pool.value":
+                                                               "questionaire_repo.risk_details.has_pool",
+    "questionaire_repo.value.risk_details.value.pool_has_protective_covering.value":
+                                                               "questionaire_repo.risk_details.pool_has_protective_covering",
+    "questionaire_repo.value.risk_details.value.ni_owns_other_properties.value":
+                                                               "questionaire_repo.risk_details.ni_owns_other_properties",
+
+    "questionaire_repo.value.mortgage_details.value.mortgage_company.value":
+                                                               "questionaire_repo.mortgage_details.mortgage_company",
+    "questionaire_repo.value.mortgage_details.value.loan_number.value":
+                                                               "questionaire_repo.mortgage_details.loan_number",
+
+    "questionaire_repo.value.prior_claims_last_5_years.value":
+                                                               "questionaire_repo.prior_claims_last_5_years",
 }
+
 
 field_mapping_lists = {
     "questionaire_repo.value.co_insured.value":                         "questionaire_repo.co_insured",
-    "questionaire_repo.value.vehicle_details.value":                     "questionaire_repo.vehicle_details",
-    "questionaire_repo.value.driver_details.value":                      "questionaire_repo.driver_details",
 }
 
 # 1. co_insured subfield mapping
@@ -1181,67 +563,14 @@ co_insured_field_map = {
     "value.safe_driver_discount.value":     "safe_driver_discount",
 }
 
-# 2. driver_details subfield mapping
-driver_details_field_map = {
-    "value.name.value.first_name.value":    "name.first_name",
-    "value.name.value.middle_name.value":   "name.middle_name",
-    "value.name.value.last_name.value":     "name.last_name",
-    "value.date_of_birth.value":            "date_of_birth",
-    "value.gender.value":                   "gender",
-    "value.relationship.value":             "relationship",
-    "value.marital_status.value":           "marital_status",
-    "value.occupation.value":               "occupation",
-    "value.education.value":                "education",
-    "value.license_status.value":           "license_status",
-    "value.licensed_state.value":           "licensed_state",
-    "value.license_number.value":           "license_number",
-    "value.licensed_age.value":             "licensed_age",
-    "value.rated.value":                    "rated",
-    "value.sr22_required.value":            "sr22_required",
-    "value.drive_for_rideshare.value":      "drive_for_rideshare",
-    "value.drive_for_delivery.value":       "drive_for_delivery",
-    "value.driver_discounts.value":         "driver_discounts",
-    "value.good_student_discount.value":    "good_student_discount",
-    "value.mature_driver_discount.value":   "mature_driver_discount",
-    "value.safe_driver_discount.value":     "safe_driver_discount",
-}
 
-# 3. vehicle_details subfield mapping
-vehicle_details_field_map = {
-    "value.vin.value":                                                       "vin",
-    "value.make.value":                                                      "make",
-    "value.model.value":                                                     "model",
-    "value.year.value":                                                      "year",
-    "value.assigned_driver.value":                                           "assigned_driver",
-    "value.garaged_state.value":                                             "garaged_state",
-    "value.garaging_address.value.street_address.value":                     "garaging_address.street_address",
-    "value.garaging_address.value.city.value":                               "garaging_address.city",
-    "value.garaging_address.value.state.value":                              "garaging_address.state",
-    "value.garaging_address.value.zip_code.value":                           "garaging_address.zip_code",
-    "value.annual_miles.value":                                              "annual_miles",
-    "value.vehicle_usage.value":                                             "vehicle_usage",
-    "value.financed_vehicle.value":                                          "financed_vehicle",
-    "value.coverage_details.value.comprehensive_deductible.value":           "coverage_details.comprehensive_deductible",
-    "value.coverage_details.value.collision_deductible.value":               "coverage_details.collision_deductible",
-    "value.coverage_details.value.towing_coverage.value.coverage_limit.value":"coverage_details.towing_coverage.coverage_limit",
-    "value.coverage_details.value.rental_reimbursement.value.daily_limit.value":"coverage_details.rental_reimbursement.daily_limit",
-    "value.coverage_details.value.rental_reimbursement.value.total_limit.value":"coverage_details.rental_reimbursement.total_limit",
-    "value.coverage_details.value.full_glass_coverage.value":               "coverage_details.full_glass_coverage",
-    "value.rented_on_turo.value":                                            "rented_on_turo",
-    "value.ownership_type.value":                                            "ownership_type",
-    "value.anti_theft_installed.value":                                      "anti_theft_installed",
-}
 
 def sync_lists(form: dict,db_data: dict,mapping:dict,get_form:bool=True) -> dict:
     data_mapping_lists = {
       "questionaire_repo.value.co_insured.value": co_insured_field_map,
-      "questionaire_repo.value.vehicle_details.value": vehicle_details_field_map,
-      "questionaire_repo.value.driver_details.value": driver_details_field_map,
       }
     copy_list_mapping_lists = {
       "questionaire_repo.value.co_insured.value": co_insured,
-      "questionaire_repo.value.vehicle_details.value": vehicle_details,
-      "questionaire_repo.value.driver_details.value": driver_details,
       }
     for form_path, db_path in mapping.items():
         form_tokens = _parse_tokens(form_path)
@@ -2751,60 +2080,69 @@ lead_repo = {
   }
 
 
-questionaire_repo = { 
-    "_id": { "$oid": "6842a6b194f4561d6a6d6cbe" },
-    "chat_id": None,
-    "lead_id": { "$oid": "6842a6b194f4561d6a6d6cbd" },
-    "license_status": None,
-    "licensed_state": None,
-    "license_number": None,
-    "licensed_age": None,
-    "rated": None,
-    "sr22_required": None,
-    "drive_for_rideshare": None,
-    "drive_for_delivery": None,
-    "driver_discounts": None,
-    "good_student_discount": None,
-    "mature_driver_discount": None,
-    "safe_driver_discount": None,
+questionaire_repo = {
+    "chat_id":None,
+    "lead_id":None,
     "number_of_co_insured": None,
     "co_insured": [],
     "additional_co_insured": None,
+
     "policy_details": {
-      "effective_date": None,
-      "current_carrier": None,
-      "current_carrier_premium": None,
-      "years_with_prior_carrier": None,
-      "years_continuous_coverage": None,
-      "prior_insurance_liability_limit": None,
-      "policy_term_length": None,
-      "payment_frequency": None
+        "effective_date":None,
+        "use":None,
+        "policy_form":None,
+        "protection_class":None,
+        "prior_carrier":None,
+        "prior_carrier_premium": None,
     },
-    "coverage_details": {
-      "bodily_injury": None,
-      "property_damage": None,
-      "personal_injury_protection": None,
-      "uninsured_motorist": None,
-      "uninsured_motorist_pd": None,
-      "underinsured_motorist": None,
-      "medical_payments": None
+
+    "property_details": {
+        "year_built":              None,
+        "effective_year_built":    None,
+        "residence_type":          None,
+        "square_footage":          None,
+        "roof_type_shape":         None,
+        "electrical_panel_type":   None,
+        "foundation":              None,
+        "floors_stories":          None,
+        "exterior":                None,
+        "framing":                 None,
+        "construction_style":      None,
+        "construction_quality":    None,
+        "kitchen_quality":         None,
+        "bedrooms":                None,
+        "full_bathrooms":          None,
+        "half_bathrooms":          None,
+        "bathroom_quality":        None,
+        "garage_type":             None,
+        "garage_stalls":           None,
+        "detached_structure_types":[],
+        "number_of_occupants":     None,
     },
-    "number_of_drivers": None,
-    "driver_details": [],
-    "additional_drivers": None,
-    "number_of_vehicles": None,
-    "vehicle_details": [],
-    "additional_vehicles": None,
-    "claim_details": None,
-      "created_at": {
-        "$date": "2025-06-06T08:28:33.520Z"
-      },
-      "updated_at": {
-        "$date": "2025-06-06T08:28:33.520Z"
-      } 
+
+    "risk_details": {
+        "has_animals":              None,
+        "animals":                  [],
+        "other_animals":            None,
+        "has_trampoline":           None,
+        "has_pool":                 None,
+        "pool_has_protective_covering":None,
+        "ni_owns_other_properties": None,
+    },
+
+    "mortgage_details": {
+        "mortgage_company":         None,
+        "loan_number":              None,
+    },
+
+    "prior_claims_last_5_years":  None,
+    "claim_details":              None,
+
+    "created_at":                 None,
+    "updated_at":                 None,
 }
 
-normalise(form)
+# normalise(form)
 data = Form(data=form,history=[],language_processor_response=[],lead_repo=lead_repo,questionaire_repo=questionaire_repo,input_tokens=0,output_tokens=0,cached_tokens=0)
 
 async def main():
@@ -2816,6 +2154,7 @@ async def main():
           'lead_repo': lead_repo,
           'questionaire_repo': questionaire_repo
         }
+
         updated_form = db_form_conversion(form, db_data, field_mapping, get_form=True)
         user_input = input("User: ")
         response = await chat_pipeline(data, user_input)

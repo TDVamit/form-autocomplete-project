@@ -2,9 +2,7 @@ import streamlit as st
 import asyncio
 import json
 import time
-import html
-import os
-from main import data, language_processor, json_agent, validation_agent, reply_agent, next_field, form, get_live_logs, validate_date
+from main_copy import  language_processor, json_agent, validation_agent, reply_agent, next_field, form, get_live_logs, validate_date, Form
 
 st.set_page_config(page_title="Insurance Form Assistant", layout="wide")
 
@@ -214,8 +212,6 @@ if not st.session_state.app_started:
     with col2:
         if st.button("🚀 Start", key="start_app", use_container_width=True):
             # Initialize fresh session-specific data
-            from main import form, Form
-            import json
             
             # Create a deep copy of the form for this session
             session_form_data = json.loads(json.dumps(form))
